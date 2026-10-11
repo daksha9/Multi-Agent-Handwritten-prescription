@@ -1,0 +1,33 @@
+========================================================================
+METROPOLITAN MULTISPECIALTY HOSPITAL - OUTPATIENT CONSULTATION NOTE
+========================================================================
+Patient Name: Rajesh Sharma              Age: 57 Years        Gender: Male
+Patient ID: P-88291                      Date: 2025-06-10     Dept: General Medicine
+Physician: Dr. V. K. Iyer, MD
+
+CLINICAL NOTES:
+- Routine diabetes and hypertension review. Patient reports mild fatigue.
+- Documented Allergies: Penicillin
+- Current Medications:
+  - Metformin 500mg once daily
+  - Amlodipine 5mg once daily
+
+VITALS:
+- Blood Pressure: 136/84 mmHg
+- Body Mass Index (BMI): 27.6 kg/m2
+
+LABORATORY VALUES:
+- Fasting Blood Glucose: 132 mg/dL
+- HbA1c: 7.1 %
+- Serum Creatinine: 1.1 mg/dL
+- Blood Urea: 18.0 mg/dL
+- Total Cholesterol: 210 mg/dL
+- LDL Cholesterol: 128 mg/dL
+- HDL Cholesterol: 42 mg/dL
+- Triglycerides: 165 mg/dL
+
+PLAN & RECOMMENDATIONS:
+- Lifestyle modifications advised.
+- Consider adding Statin therapy at next review if LDL persists above 100 mg/dL.
+========================================================================
+

@@ -1,0 +1,34 @@
+# ==============================================================================
+# MedAgent: Clinical AI & Prescription Intelligence Platform Dependencies
+# ==============================================================================
+
+# Core Web UI & Data Visualization
+streamlit>=1.35.0
+plotly>=5.22.0
+matplotlib>=3.9.0
+
+# Multimodal Vision AI & LLMs
+google-genai>=0.1.1
+groq>=0.9.0
+python-dotenv>=1.0.0
+pydantic>=2.7.0
+
+# Deep Learning OCR & Computer Vision (Local TrOCR Fallback)
+torch==2.3.0
+torchvision==0.18.0
+transformers==4.41.0
+accelerate>=0.26.0
+opencv-python>=4.9.0
+pillow>=10.3.0
+
+# Data Science & Medical Dictionary String Search
+numpy>=1.26.0
+pandas>=2.2.0
+rapidfuzz>=3.8.0
+scikit-learn>=1.5.0
+
+# Document & Clinical Report Parsing
+pdfplumber>=0.11.0
+
+# Testing & Quality Assurance
+pytest>=8.0.0

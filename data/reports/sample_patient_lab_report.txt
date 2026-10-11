@@ -1,0 +1,45 @@
+========================================================================
+METROPOLITAN MULTISPECIALTY HOSPITAL - CLINICAL BIOCHEMISTRY REPORT
+========================================================================
+Patient Name: Rajesh Sharma              Age: 58 Years        Gender: Male
+Patient ID: P-88291                      Date: 2026-03-15     Dept: Endocrinology
+Referring Physician: Dr. V. K. Iyer, MD
+
+CLINICAL NOTES & HISTORY:
+- Known Type 2 Diabetes Mellitus for 6 years.
+- Essential Hypertension, Stage 1.
+- Documented Allergies: Penicillin, Sulfa drugs (hypersensitivity rash).
+- Current Medications:
+  - Metformin 500mg twice daily
+  - Atorvastatin 20mg once daily at bedtime
+  - Amlodipine 5mg once daily
+
+VITALS:
+- Blood Pressure: 148/92 mmHg
+- Body Mass Index (BMI): 28.4 kg/m2
+- Pulse: 78 bpm
+
+LABORATORY INVESTIGATIONS:
+Investigation                        Observed Value     Reference Range
+------------------------------------------------------------------------
+Fasting Blood Sugar (FBS)            154 mg/dL          (70.0 - 99.0 mg/dL)
+Postprandial Blood Sugar (PPBS)      215 mg/dL          (90.0 - 140.0 mg/dL)
+Glycated Hemoglobin (HbA1c)          7.8 %              (4.0 - 5.6 %)
+Serum Creatinine                     1.45 mg/dL         (0.6 - 1.2 mg/dL)
+Blood Urea Nitrogen (BUN)            24.0 mg/dL         (7.0 - 20.0 mg/dL)
+Total Cholesterol                    228 mg/dL          (125.0 - 200.0 mg/dL)
+LDL Cholesterol                      142 mg/dL          (50.0 - 100.0 mg/dL)
+HDL Cholesterol                      36 mg/dL           (40.0 - 60.0 mg/dL)
+Triglycerides                        195 mg/dL          (50.0 - 150.0 mg/dL)
+Alanine Aminotransferase (ALT/SGPT)  52 U/L             (7.0 - 45.0 U/L)
+Aspartate Aminotransferase (AST)     38 U/L             (8.0 - 40.0 U/L)
+Hemoglobin                           13.4 g/dL          (12.0 - 16.5 g/dL)
+Platelet Count                       2.8 Lakhs/mcL      (1.5 - 4.5 Lakhs/mcL)
+
+IMPRESSION & OBSERVATIONS:
+1. Sub-optimally controlled Type 2 Diabetes with progressive glycemic rise.
+2. Elevated Serum Creatinine suggesting early diabetic microvascular renal involvement.
+3. Atherogenic dyslipidemia with elevated LDL and depressed HDL.
+4. Stage 2 Systolic/Diastolic Hypertension requiring therapeutic optimization.
+========================================================================
+

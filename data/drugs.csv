@@ -1,0 +1,11 @@
+drug_name,common_interactions,contraindications
+Paracetamol,Warfarin,Liver failure
+Amoxicillin,Allopurinol,Penicillin allergy
+Metformin,Contrast dye,Severe renal impairment
+Atorvastatin,Clarithromycin,Liver disease
+Aspirin,Warfarin,Bleeding disorders
+Pantoprazole,Clopidogrel,Vitamin B12 deficiency
+Ibuprofen,Aspirin,Peptic ulcer
+Omeprazole,Clopidogrel,Liver disease
+Cetirizine,Alcohol,Severe renal impairment
+Salbutamol,Beta-blockers,Hyperthyroidismt

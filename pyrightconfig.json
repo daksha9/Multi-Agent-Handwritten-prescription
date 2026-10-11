@@ -1,0 +1,19 @@
+{
+  "include": [
+    "src",
+    "tests"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    ".venv",
+    "notebooks"
+  ],
+  "extraPaths": [
+    ".",
+    "src"
+  ],
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.11",
+  "pythonPlatform": "Windows"
+}
