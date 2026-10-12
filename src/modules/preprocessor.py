@@ -1,3 +1,6 @@
+import tempfile
+from pathlib import Path
+
 import cv2
 import numpy as np
 from PIL import Image
@@ -490,3 +493,116 @@ class PrescriptionPreprocessor:
             line_images.append(Image.fromarray(crop))
 
         return line_images
+
+    # ============================================================
+    # DESKEW — align handwritten text baselines
+    # ============================================================
+
+    def deskew(self, pil_image):
+        """
+        Correct rotation/skew so that handwritten text baselines are horizontal.
+
+        Uses the binary text mask -> minAreaRect -> angle correction.
+        Robust to sparse handwriting by falling back to the original image
+        when no reliable text contour is found.
+        """
+        if pil_image is None:
+            raise ValueError("Input image is None.")
+
+        image = np.array(pil_image.convert("RGB"))
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
+        # Adaptive threshold to isolate ink
+        binary = cv2.adaptiveThreshold(
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 31, 10
+        )
+
+        # Find all non-zero (ink) coordinates
+        coords = np.column_stack(np.nonzero(binary))
+        if coords.shape[0] < 50:
+            # Not enough ink to estimate angle — return original
+            return pil_image
+
+        # minAreaRect returns ((cx, cy), (w, h), angle)
+        rect = cv2.minAreaRect(coords)
+        angle = float(rect[2]) if len(rect) >= 3 else 0.0
+
+        # OpenCV angle convention: -90 <= angle < 0. Normalize to -45..45.
+        angle = -(90 + angle) if angle < -45 else -angle
+
+        # Ignore negligible skew (< 0.5 deg)
+        if abs(angle) < 0.5:
+            return pil_image
+
+        h, w = image.shape[:2]
+        center = (w // 2, h // 2)
+        M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        rotated = cv2.warpAffine(
+            image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE
+        )
+
+        return Image.fromarray(rotated)
+
+    # ============================================================
+    # STAGE 1 ENTRY POINT
+    # ============================================================
+
+    def run_stage1(self, image_input, output_path: str | Path | None = None) -> dict:
+        """
+        Stage 1: Image Preprocessing Agent.
+
+        1. Load raw image (PIL Image or path).
+        2. Apply adaptive contrast (CLAHE) + denoise + sharpen.
+        3. Binarize and de-skew to align baselines.
+        4. Save cleaned image to temp storage ("enhanced_prescription.jpg").
+        5. Return execution metadata.
+
+        Parameters
+        ----------
+        image_input : PIL.Image.Image or str or Path
+            Raw prescription image.
+        output_path : str or Path, optional
+            Where to save the enhanced image. Defaults to a temp file
+            named "enhanced_prescription.jpg".
+
+        Returns
+        -------
+        dict
+            {"status": "SUCCESS" | "ERROR",
+             "processed_image_path": str,
+             "enhanced_image": PIL.Image,
+             "error": str (only on ERROR)}
+        """
+        try:
+            # ── Load ──
+            if isinstance(image_input, (str, Path)):
+                pil_image = Image.open(image_input).convert("RGB")
+            else:
+                pil_image = image_input.convert("RGB")
+
+            # ── CLAHE contrast + denoise + sharpen ──
+            enhanced = self.preprocess(pil_image)
+
+            # ── De-skew to align baselines ──
+            deskewed = self.deskew(enhanced)
+
+            # ── Save to temp storage ──
+            if output_path is None:
+                tmp_dir = Path(tempfile.gettempdir())
+                output_path = tmp_dir / "enhanced_prescription.jpg"
+            output_path = Path(output_path)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            deskewed.save(str(output_path), "JPEG", quality=92)
+
+            return {
+                "status": "SUCCESS",
+                "processed_image_path": str(output_path),
+                "enhanced_image": deskewed,
+            }
+        except Exception as e:
+            return {
+                "status": "ERROR",
+                "processed_image_path": None,
+                "enhanced_image": None,
+                "error": str(e),
+            }

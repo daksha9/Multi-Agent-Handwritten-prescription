@@ -150,6 +150,7 @@ class MedicationImpactAnalyzer:
         df["date"] = pd.to_datetime(df["date"], errors="coerce")
         df["value"] = pd.to_numeric(df["value"], errors="coerce")
         df = df.dropna(subset=["date", "value"]).sort_values(by=["parameter", "date"])
+        df = df.drop_duplicates(subset=["parameter", "date"], keep="last")
 
         comparison_records = []
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 import io
 from typing import Any
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile  # type: ignore[import-not-found]
 from PIL import Image
 
 from ..modules.impact_analyzer import MedicationImpactAnalyzer
@@ -115,7 +115,7 @@ def get_unified_patient_analytics(patient_id: str) -> dict[str, Any]:
     if not patient:
         raise HTTPException(status_code=404, detail=f"Patient {patient_id} not found")
 
-    lab_reports = db.get_lab_reports(patient_id)
+    lab_reports = patient.get("lab_reports", [])
     prescriptions = patient.get("prescriptions", [])
     comparison_records = impact_analyzer.compute_parameter_comparison_table(lab_reports)
 

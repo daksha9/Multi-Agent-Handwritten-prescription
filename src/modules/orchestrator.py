@@ -8,7 +8,10 @@ import pandas as pd
 from .history_agent import PatientHistorySynthesisAgent
 from .parser import ClinicalDocumentParser
 from .prediction_agent import DiseasePredictionAgent
+from .preprocessor import PrescriptionPreprocessor
+from .prescription_vision import PrescriptionVisionExtractor
 from .verification_agent import PrescriptionVerificationAgent
+from .voice_agent import PatientVoiceHistoryAgent
 
 
 class ClinicalAgentOrchestrator:
@@ -31,6 +34,11 @@ class ClinicalAgentOrchestrator:
         self.verification_agent = PrescriptionVerificationAgent()
         self.prediction_agent = DiseasePredictionAgent()
         self.history_agent = PatientHistorySynthesisAgent()
+
+        # 4-stage pipeline agents
+        self.preprocessor = PrescriptionPreprocessor()
+        self.vision_extractor = PrescriptionVisionExtractor()
+        self.voice_agent = PatientVoiceHistoryAgent()
 
         # Telemetry storage
         self.processed_prescriptions: list[dict[str, Any]] = []
@@ -82,6 +90,159 @@ class ClinicalAgentOrchestrator:
 
         verification_result["execution_latency_sec"] = elapsed_time
         return verification_result
+
+    # ============================================================
+    # 4-STAGE AGENT PIPELINE
+    # ============================================================
+
+    def run_4stage_pipeline(
+        self,
+        image_input,
+        audio_path: str | Path | None = None,
+        audio_bytes: bytes | None = None,
+    ) -> dict[str, Any]:
+        """
+        End-to-end 4-stage agent pipeline:
+          Stage 1: Image Preprocessing (CLAHE, binarization, de-skew)
+          Stage 2: Handwritten OCR & Text Extraction (Gemini Vision + drug normalization)
+          Stage 3: Patient Voice History & Speech (Gemini Audio transcription + NER)
+          Stage 4: Clinical Reasoning & Doctor Safety (cross-reference + risk report)
+
+        Parameters
+        ----------
+        image_input : PIL.Image.Image or str or Path
+            Raw handwritten prescription image.
+        audio_path : str or Path, optional
+            Path to patient's audio recording (.wav / .mp3).
+        audio_bytes : bytes, optional
+            Raw bytes of on-the-spot voice recording. If neither provided,
+            Stage 3 returns an empty history and Stage 4 skips voice-based checks.
+
+        Returns
+        -------
+        dict
+            {
+              "stage1_preprocessing": {...},
+              "stage2_ocr_extraction": {...},
+              "stage3_voice_history": {...},
+              "stage4_doctor_dashboard": {...},
+              "execution_telemetry": {...}
+            }
+        """
+        pipeline_start = time.time()
+        telemetry: dict[str, Any] = {"stages": {}}
+
+        # ── STAGE 1: Image Preprocessing ──
+        t0 = time.time()
+        stage1 = self.preprocessor.run_stage1(image_input)
+        telemetry["stages"]["stage1"] = {
+            "status": stage1.get("status"),
+            "latency_sec": round(time.time() - t0, 3),
+        }
+
+        if stage1.get("status") != "SUCCESS":
+            return {
+                "stage1_preprocessing": stage1,
+                "stage2_ocr_extraction": None,
+                "stage3_voice_history": None,
+                "stage4_doctor_dashboard": None,
+                "execution_telemetry": telemetry,
+                "error": f"Stage 1 failed: {stage1.get('error')}",
+            }
+
+        enhanced_image = stage1["enhanced_image"]
+
+        # ── STAGE 2: Handwritten OCR & Text Extraction ──
+        t0 = time.time()
+        stage2 = self.vision_extractor.extract_stage2(enhanced_image)
+        telemetry["stages"]["stage2"] = {
+            "medications_count": len(stage2.get("prescribed_medications", [])),
+            "latency_sec": round(time.time() - t0, 3),
+        }
+
+        # ── STAGE 3: Patient Voice History & Speech ──
+        t0 = time.time()
+        if audio_bytes:
+            stage3 = self.voice_agent.transcribe_and_extract(audio_bytes)
+        elif audio_path:
+            stage3 = self.voice_agent.transcribe_and_extract(audio_path)
+        else:
+            stage3 = {
+                "raw_transcript": "",
+                "patient_reported_history": {
+                    "known_allergies": [],
+                    "chronic_conditions": [],
+                    "current_active_medications": [],
+                    "past_reported_side_effects": [],
+                },
+                "note": "No audio provided — voice history skipped.",
+            }
+        telemetry["stages"]["stage3"] = {
+            "transcript_length": len(stage3.get("raw_transcript", "")),
+            "latency_sec": round(time.time() - t0, 3),
+        }
+
+        # ── STAGE 4: Clinical Reasoning & Doctor Safety ──
+        t0 = time.time()
+        stage4 = self.verification_agent.run_stage4(stage2, stage3)
+        telemetry["stages"]["stage4"] = {
+            "alert_level": stage4.get("overall_safety_alert_level"),
+            "risk_count": len(stage4.get("clinical_risk_analysis", [])),
+            "latency_sec": round(time.time() - t0, 3),
+        }
+
+        telemetry["total_latency_sec"] = round(time.time() - pipeline_start, 3)
+
+        return {
+            "stage1_preprocessing": {
+                "status": stage1["status"],
+                "processed_image_path": stage1["processed_image_path"],
+            },
+            "stage2_ocr_extraction": stage2,
+            "stage3_voice_history": stage3,
+            "stage4_doctor_dashboard": stage4,
+            "execution_telemetry": telemetry,
+        }
+
+    def run_post_medication_analysis(
+        self,
+        feedback_text: str | None = None,
+        audio_bytes: bytes | None = None,
+        audio_path: str | Path | None = None,
+        prescribed_medications: list[dict[str, Any]] | list[str] | None = None,
+        patient_allergies: list[str] | None = None,
+        patient_conditions: list[str] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Coordinates post-medication voice & text analysis:
+        1. Transcribes audio if provided.
+        2. Merges with typed text.
+        3. Calls verification agent to perform ADR causality & doctor recommendations.
+        """
+        transcribed_text = ""
+        if audio_bytes:
+            transcribed_text = self.voice_agent.transcribe_audio_bytes(audio_bytes)
+        elif audio_path:
+            transcribed_text = self.voice_agent.transcribe_audio(audio_path)
+
+        combined_feedback = ""
+        if transcribed_text and feedback_text:
+            combined_feedback = f"{feedback_text.strip()} (Spoken note: {transcribed_text.strip()})"
+        elif transcribed_text:
+            combined_feedback = transcribed_text.strip()
+        elif feedback_text:
+            combined_feedback = feedback_text.strip()
+
+        meds = prescribed_medications or []
+        analysis = self.verification_agent.analyze_post_medication_feedback(
+            prescribed_medications=meds,
+            patient_allergies=patient_allergies,
+            patient_conditions=patient_conditions,
+            feedback_text=combined_feedback,
+        )
+        analysis["spoken_transcript"] = transcribed_text
+        analysis["typed_text"] = feedback_text or ""
+        return analysis
 
     def process_patient_documents(
         self,
@@ -663,16 +824,22 @@ class ClinicalAgentOrchestrator:
 
                     lower_better = metric_def.get("lower_is_better", True)
                     try:
-                        lo, hi = _parse_ref_range(ref_range)
+                        _, hi = _parse_ref_range(ref_range)
                     except Exception:
-                        lo, hi = None, None
+                        hi = None
 
-                    def _direction(abs_ch: float, pct_ch: float) -> str:
+                    def _direction(
+                        abs_ch: float,
+                        pct_ch: float,
+                        lb: bool = lower_better,
+                        hi_lim: float | None = hi,
+                        cur_val: float = curr_v,
+                    ) -> str:
                         if abs(pct_ch) < 2.0:
                             return "Stable"
-                        if lower_better:
+                        if lb:
                             if abs_ch < 0:
-                                if hi is not None and curr_v <= hi:
+                                if hi_lim is not None and cur_val <= hi_lim:
                                     return "Improving"
                                 return "Improving"
                             return "Worsening"
@@ -740,7 +907,7 @@ class ClinicalAgentOrchestrator:
         best_med: str
         evidence_lines: list[str]
         if normalized_scores:
-            best_med = max(normalized_scores, key=normalized_scores.get)
+            best_med = max(normalized_scores, key=lambda k: normalized_scores[k])
             # Build evidence-based reasoning narrative
             evidence_lines = [
                 f"Descriptive longitudinal trend analysis reviewed {len(report_groups)} distinct diagnostic "

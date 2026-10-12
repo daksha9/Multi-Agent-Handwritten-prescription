@@ -753,6 +753,13 @@ class PatientMedicalDatabase:
         self._save()
         return True
 
+    def get_lab_reports(self, patient_id: str) -> list[dict[str, Any]]:
+        """Returns patient lab records as a raw list of dictionaries."""
+        patient = self.get_patient(patient_id)
+        if not patient or not patient.get("lab_reports"):
+            return []
+        return list(patient["lab_reports"])
+
     def add_lab_report(self, patient_id: str, lab_entry: dict[str, Any]) -> bool:
         """Appends a new lab parameter record."""
         patient = self.get_patient(patient_id)
@@ -761,6 +768,93 @@ class PatientMedicalDatabase:
         patient.setdefault("lab_reports", []).append(lab_entry)
         self._save()
         return True
+
+    def save_structured_report(
+        self,
+        patient_id: str,
+        report_id: str,
+        report_name: str,
+        test_date: str,
+        associated_medication: str,
+        parameters: list[dict[str, Any]],
+    ) -> bool:
+        """
+        Saves or updates a distinct laboratory report for a patient.
+        Replaces any prior entries with matching report_id so reports are
+        never merged, duplicated, or corrupted by repeated saves.
+        """
+        patient = self.get_patient(patient_id)
+        if not patient:
+            return False
+
+        existing_reports = patient.setdefault("lab_reports", [])
+        # Filter out old entries for this report_id or matching date & medication
+        cleaned_reports = [
+            r
+            for r in existing_reports
+            if r.get("report_id") != report_id
+            and not (
+                r.get("date") == test_date
+                and r.get("associated_medication") == associated_medication
+            )
+        ]
+
+        new_entries = []
+        for p in parameters:
+            entry = {
+                "report_id": report_id,
+                "report_name": report_name,
+                "date": test_date,
+                "parameter": p["parameter"],
+                "value": float(p["value"]),
+                "unit": p.get("unit", ""),
+                "reference_range": p.get("reference_range", ""),
+                "condition": p.get("condition", "General Health"),
+                "associated_medication": associated_medication,
+            }
+            new_entries.append(entry)
+
+        patient["lab_reports"] = cleaned_reports + new_entries
+        self._save()
+        return True
+
+    def get_distinct_reports(self, patient_id: str) -> list[dict[str, Any]]:
+        """
+        Returns a list of distinct grouped reports for the patient.
+        Each item summarizes report_id, report_name, date, associated_medication,
+        and its list of parameter observations.
+        """
+        patient = self.get_patient(patient_id)
+        if not patient or not patient.get("lab_reports"):
+            return []
+
+        reports_map: dict[str, dict[str, Any]] = {}
+        for r in patient["lab_reports"]:
+            rep_id = r.get("report_id") or f"Report on {r.get('date', 'Unknown')}"
+            key = f"{rep_id}_{r.get('date')}_{r.get('associated_medication')}"
+            if key not in reports_map:
+                reports_map[key] = {
+                    "report_id": rep_id,
+                    "report_name": r.get("report_name") or rep_id,
+                    "date": r.get("date", "Unknown"),
+                    "associated_medication": r.get("associated_medication", "Unassigned"),
+                    "parameters": [],
+                }
+            reports_map[key]["parameters"].append(
+                {
+                    "parameter": r.get("parameter"),
+                    "value": r.get("value"),
+                    "unit": r.get("unit"),
+                    "reference_range": r.get("reference_range"),
+                    "condition": r.get("condition"),
+                }
+            )
+
+        # Return sorted chronologically by date
+        sorted_reports = sorted(
+            reports_map.values(), key=lambda x: str(x.get("date", ""))
+        )
+        return sorted_reports
 
     def get_lab_reports_df(self, patient_id: str) -> pd.DataFrame:
         """Returns patient lab records as a cleaned pandas DataFrame."""

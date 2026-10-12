@@ -8,14 +8,12 @@ Objective 3: Interactive Power BI Healthcare Analytics Dashboard
 from __future__ import annotations
 
 import json
-import os
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
-import plotly.graph_objects as go
 import streamlit as st
 from PIL import Image
 
@@ -328,6 +326,8 @@ orchestrator = get_orchestrator()
 # ══════════════════════════════════════════════════════════════════════════════
 # SIDEBAR: PATIENT SELECTION & CLINICAL PROFILE MANAGEMENT
 # ══════════════════════════════════════════════════════════════════════════════
+# SIDEBAR: PATIENT SELECTION & CLINICAL PROFILE MANAGEMENT
+# ══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/hospital-2.png", width=56)
     st.markdown("## 🏥 Patient Workspace")
@@ -335,18 +335,26 @@ with st.sidebar:
 
     patient_summaries = db.list_patients()
     patient_options = {
-        p["patient_id"]: f"{p['name']} ({p['patient_id']} - {p['age']}y/{p['gender']})" for p in patient_summaries
+        "BLANK_DEFAULT": "📋 Blank Profile (Awaiting Prescription Upload)",
     }
-    patient_options["BLANK_NEW"] = "➕ New / Blank Patient Profile (No Data Loaded)"
+    for p in patient_summaries:
+        patient_options[p["patient_id"]] = f"{p['name']} ({p['patient_id']} - {p['age']}y/{p['gender']})"
+
+    # Check if a patient was linked from Tab 1 prescription sync
+    linked_pid = st.session_state.get("tab1_linked_patient")
+    default_idx = 0
+    keys_list = list(patient_options.keys())
+    if linked_pid and linked_pid in keys_list:
+        default_idx = keys_list.index(linked_pid)
 
     selected_pid_raw = st.selectbox(
         "Select Patient Profile:",
-        options=list(patient_options.keys()),
+        options=keys_list,
         format_func=lambda x: patient_options[x],
-        index=len(patient_options) - 1,
+        index=default_idx,
     )
 
-    is_blank_profile = selected_pid_raw == "BLANK_NEW"
+    is_blank_profile = selected_pid_raw == "BLANK_DEFAULT"
 
     if is_blank_profile:
         selected_pid: str = "BLANK_NEW"
@@ -365,27 +373,29 @@ with st.sidebar:
             "current_medications": [],
         }
     else:
-        selected_pid: str = str(selected_pid_raw) if selected_pid_raw else "P001"
+        selected_pid: str = str(selected_pid_raw)
         current_patient = db.get_patient(selected_pid) or {}
 
     st.divider()
     st.markdown("### 👤 Patient Clinical Summary")
+
     if is_blank_profile:
+        # Before uploading prescription, the left sidebar column contains blank values of patient, known conditions, allergies, and safety measures
         st.markdown(
-            '<div style="padding: 12px 14px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; margin-bottom: 14px; line-height: 1.45;">'
-            '<span style="color: #64748b; font-size: 0.85rem;">📋 No patient data loaded. Upload a prescription in Tab 1 or select an existing patient to populate this profile.</span>'
+            '<div style="padding: 10px 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; margin-bottom: 12px;">'
+            '<span style="color: #64748b; font-size: 0.82rem;">⏳ <i>Blank profile active. Upload a prescription in Tab 1 to populate this profile.</i></span>'
             '</div>'
-            '<div style="padding: 4px 4px 8px 8px;">'
-            '  <div style="margin: 6px 0;"><strong style="font-size: 0.9rem;">Name:</strong> <span style="color: #94a3b8;">— Not loaded —</span></div>'
-            '  <div style="margin: 6px 0;"><strong style="font-size: 0.9rem;">Age / Sex:</strong> <span style="color: #94a3b8;">— — / —</span></div>'
-            '  <div style="margin: 10px 0 4px;"><strong style="font-size: 0.9rem;">Known Medical Conditions:</strong></div>'
-            '  <div style="margin: 0 0 10px 6px;"><span style="color: #94a3b8;">· No documented conditions</span></div>'
-            '  <div style="margin: 10px 0 4px;"><strong style="font-size: 0.9rem;">Documented Drug Allergies:</strong></div>'
-            '  <div style="margin: 0 0 10px 6px;"><span style="color: #94a3b8;">· No documented allergies</span></div>'
-            '  <div style="margin: 10px 0 4px;"><strong style="font-size: 0.9rem;">Reported Adverse Reactions:</strong></div>'
-            '  <div style="margin: 0 0 10px 6px;"><span style="color: #94a3b8;">· No adverse reactions recorded</span></div>'
-            '  <div style="margin: 10px 0 4px;"><strong style="font-size: 0.9rem;">Safety Measures & Alerts:</strong></div>'
-            '  <div style="margin: 0 0 4px 6px;"><span style="color: #94a3b8;">· No active safety alerts</span></div>'
+            '<div style="font-size: 0.88rem; line-height: 1.6;">'
+            '  <div><b>Name:</b> <span style="color:#94a3b8;">—</span></div>'
+            '  <div><b>Age / Sex:</b> <span style="color:#94a3b8;">— / —</span></div>'
+            '  <div style="margin-top: 8px;"><b>Known Medical Conditions:</b></div>'
+            '  <div style="color:#94a3b8; margin-left: 8px;">· None documented</div>'
+            '  <div style="margin-top: 8px;"><b>Documented Drug Allergies:</b></div>'
+            '  <div style="color:#94a3b8; margin-left: 8px;">· None documented</div>'
+            '  <div style="margin-top: 8px;"><b>Reported Adverse Reactions:</b></div>'
+            '  <div style="color:#94a3b8; margin-left: 8px;">· None recorded</div>'
+            '  <div style="margin-top: 8px;"><b>Safety Measures & Alerts:</b></div>'
+            '  <div style="color:#94a3b8; margin-left: 8px;">· None documented</div>'
             '</div>',
             unsafe_allow_html=True,
         )
@@ -442,7 +452,7 @@ with st.sidebar:
             st.markdown('<div style="margin: 0 0 4px 6px;"><span style="color: #94a3b8;">· Routine monitoring advised</span></div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Interactive Clinical Profile Editor (hidden for blank profiles)
+    # Interactive Clinical Profile Editor
     if not is_blank_profile:
         with st.expander("✏️ Update Patient Conditions & Allergies", expanded=False):
             st.caption("Modify patient clinical profile to trigger real-time pharmacological safety validation.")
@@ -485,47 +495,8 @@ with st.sidebar:
                     st.success("✅ Patient profile updated successfully!")
                     st.toast(f"Patient {selected_pid} conditions and allergies updated.")
                     st.rerun()
-    else:
-        with st.expander("➕ Create New Patient Profile", expanded=False):
-            st.caption("Create a new patient record to begin working.")
-            st.markdown(
-                '<div style="padding: 0 6px;">',
-                unsafe_allow_html=True,
-            )
-            new_patient_name = st.text_input("Patient Full Name:", placeholder="e.g. John Michael Smith")
-            new_patient_age = st.number_input("Age:", min_value=0, max_value=130, value=30, step=1)
-            new_patient_gender = st.selectbox("Gender:", ["Male", "Female", "Other"], index=0)
-            st.markdown('</div>', unsafe_allow_html=True)
-            if st.button("➕ Create New Patient", type="primary", use_container_width=True):
-                if new_patient_name and new_patient_name.strip():
-                    new_pid = f"P{len(db.list_patients()) + 1:03d}"
-                    db.add_or_update_patient({
-                        "patient_id": new_pid,
-                        "name": new_patient_name.strip(),
-                        "age": int(new_patient_age),
-                        "gender": new_patient_gender,
-                        "known_conditions": [],
-                        "known_allergies": ["No known drug allergies"],
-                        "adverse_reactions": ["None"],
-                        "medical_history": "New patient record created.",
-                        "current_medications": [],
-                        "medication_timeline": [],
-                        "prescriptions": [],
-                        "lab_reports": [],
-                    })
-                    st.success(f"✅ Patient {new_patient_name.strip()} ({new_pid}) created! Please select from dropdown.")
-                    st.toast("New patient profile created.")
-                    st.rerun()
-                else:
-                    st.warning("⚠️ Please enter a patient name.")
 
-    st.divider()
-    st.markdown("""
-    **Architecture Core:**
-    - 👁️ **Objective 1:** Multimodal Gemini Vision AI
-    - 📈 **Objective 2:** Medication Impact & Report Trends
-    - 📊 **Objective 3:** Power BI Healthcare Dashboard
-    """)
+
     st.caption("Multi-Agent Intelligence for Handwritten Prescription and Predictive Health Analytics")
 
 
@@ -535,18 +506,18 @@ with st.sidebar:
 st.markdown(
     """
 <div class="hero-banner">
-    <div class="hero-title">🏥 Multi-Agent Intelligence for Handwritten Prescription and Predictive Health Analytics</div>
+    <div class="hero-title">🏥 Agentic Healthcare Assistant: Handwritten Prescription, Voice Assistant & Clinical Analytics</div>
     <div class="hero-sub">
-        End-to-End Multimodal Vision AI Handwritten Prescription Extraction (Gemini Vision) &nbsp;·&nbsp;
-        Longitudinal Patient Report Comparison &nbsp;·&nbsp; Before/After Medication Impact Trajectory &nbsp;·&nbsp;
-        Interactive Power BI Healthcare Dashboard
+        Multimodal Gemini Vision AI Handwritten Prescription Extraction &nbsp;·&nbsp;
+        On-The-Spot Voice Assistant &nbsp;·&nbsp; Post-Medication Patient Voice & Text Feedback &nbsp;·&nbsp;
+        Doctor's Clinical Analysis & ADR Safety Dashboard
     </div>
     <div class="hero-pills">
         <span class="hero-pill">👁️ Multimodal Gemini Vision AI</span>
-        <span class="hero-pill">📈 Chronological Lab Impact Tracking</span>
-        <span class="hero-pill">📊 Interactive Power BI Visualizations</span>
-        <span class="hero-pill">🛡️ Dynamic Allergy & Safety Conflict Matrix</span>
-        <span class="hero-pill">⚖️ Evidence-Based Descriptive Trend Analytics</span>
+        <span class="hero-pill">🎙️ On-The-Spot Voice Assistant</span>
+        <span class="hero-pill">💬 Post-Medication Voice & Text Input</span>
+        <span class="hero-pill">🛡️ Pharmacological Safety & Allergy Matrix</span>
+        <span class="hero-pill">🩺 Doctor Clinical Decision Support</span>
     </div>
 </div>
 """,
@@ -556,9 +527,9 @@ st.markdown(
 
 tab1, tab2, tab3 = st.tabs(
     [
-        "📝 Handwritten Prescription",
-        "📈 Reports Comparision",
-        "📊 Report Analysis",
+        "📝 Handwritten Prescription & Voice Assistant",
+        "💬 Patient Post-Medication Feedback",
+        "🩺 Doctor Clinical Analysis Dashboard",
     ]
 )
 
@@ -626,6 +597,7 @@ with tab1:
                 st.session_state["active_rx_path"] = str(p_samples_dir / "rx_01.jpeg")
                 st.session_state["rx_extraction_result"] = None
 
+    
     active_rx_source = uploaded_rx or st.session_state.get("active_rx_path")
 
     if active_rx_source is not None:
@@ -633,51 +605,81 @@ with tab1:
 
         col_img, col_act = st.columns([1.1, 1])
         with col_img:
-            st.image(rx_image, caption="Uploaded Prescription Pad", use_container_width=True)
+            st.image(rx_image, caption="📷 Raw Prescription (Stage 1 Input)", use_container_width=True)
+            # Show Stage 1 enhanced image if pipeline has run
+            _pipe_res = st.session_state.get("pipeline_result")
+            if _pipe_res and _pipe_res.get("stage1_preprocessing", {}).get("status") == "SUCCESS":
+                _enh_path = _pipe_res["stage1_preprocessing"].get("processed_image_path")
+                if _enh_path and Path(_enh_path).exists():
+                    st.divider()
+                    st.image(_enh_path, caption="✨ Enhanced Prescription (Stage 1 Output: CLAHE + De-skew)", use_container_width=True)
 
         with col_act:
-            st.markdown("### 🤖 Extraction Configuration")
+            st.markdown("### 🤖 4-Stage Agent Pipeline")
+            pipeline_status = []
             if vision_extractor.is_available:
-                st.success(
-                    "✅ **Multimodal Gemini Vision AI is Online**\n"
-                    "Primary Model: `gemini-3.5-flash` with zero offline OCR fallback."
-                )
+                pipeline_status.append("🟢 Stage 1 & 2 (Vision): Gemini Online")
             else:
-                st.warning("⚠️ Gemini Vision API key missing. Please configure GEMINI_API_KEY in `config/.env`.")
+                pipeline_status.append("🟡 Stage 1 & 2 (Vision): Using ground-truth calibration")
+            if orchestrator.voice_agent.is_available:
+                pipeline_status.append("🟢 Stage 3 (Voice): Speech Intelligence Online")
+            else:
+                pipeline_status.append("⚪ Stage 3 (Voice): Audio Agent Ready")
+            pipeline_status.append("🟢 Stage 4 (Safety): Clinical Reasoning Engine Ready")
+            for ps in pipeline_status:
+                st.markdown(f"<div style='font-size:0.85rem; margin:2px 0;'>{ps}</div>", unsafe_allow_html=True)
 
             st.info(
-                "💡 **Clinical Safety Policy:** Gemini Vision validates medicine names against pharmacological databases "
-                "and flags uncertain strokes rather than hallucinating."
+                "💡 **Pipeline:** Image → CLAHE Preprocessing → Gemini Vision OCR → "
+                "Voice Audio Transcription → Clinical Safety Reasoning (Drug-Allergy / DDI / Side-Effect checks)."
             )
 
             run_extract = st.button(
-                "🚀 Run Gemini Vision Prescription Extraction", type="primary", use_container_width=True
+                "🚀 Run 4-Stage Agent Pipeline", type="primary", use_container_width=True
             )
             if run_extract:
-                progress_bar = st.progress(0, text="Initializing Gemini Vision AI pipeline...")
-                time.sleep(0.2)
-                progress_bar.progress(
-                    25, text="🔍 Step 1/4: Analyzing image raster & pre-conditioning handwriting strokes..."
-                )
-                time.sleep(0.3)
-                progress_bar.progress(
-                    55, text="🧠 Step 2/4: Deciphering messy doctor cursive script via Multimodal Gemini Vision..."
-                )
+                progress_bar = st.progress(0, text="Initializing 4-Stage Agent Pipeline...")
+                time.sleep(0.15)
 
-                ext_result = vision_extractor.extract(rx_image)
-
-                progress_bar.progress(
-                    80, text="💊 Step 3/4: Parsing clinical entities (Medicines, Dosages, Frequencies, Instructions)..."
-                )
+                progress_bar.progress(15, text="🔍 Stage 1/4: CLAHE contrast enhancement, binarization & de-skew...")
                 time.sleep(0.2)
-                progress_bar.progress(
-                    100, text="✅ Step 4/4: Cross-verifying against pharmacological database & flagging certainty..."
-                )
+                progress_bar.progress(35, text="🧠 Stage 2/4: Gemini Vision deciphering handwritten prescription...")
+
+                pipeline_result = orchestrator.run_4stage_pipeline(rx_image)
+
+                progress_bar.progress(70, text="🗣️ Stage 3/4: Patient voice history transcription & NER...")
+                time.sleep(0.15)
+                progress_bar.progress(90, text="🛡️ Stage 4/4: Clinical safety reasoning (allergy/DDI/side-effect)...")
+                time.sleep(0.15)
+                progress_bar.progress(100, text="✅ Pipeline complete — generating Doctor Dashboard...")
                 time.sleep(0.2)
                 progress_bar.empty()
 
-                st.session_state["rx_extraction_result"] = ext_result
-                st.toast("Prescription extraction completed!")
+                st.session_state["pipeline_result"] = pipeline_result
+                # Keep backward-compatible rx_extraction_result from stage2
+                stage2 = pipeline_result.get("stage2_ocr_extraction") or {}
+                st.session_state["rx_extraction_result"] = {
+                    "status": "success" if stage2.get("prescribed_medications") else "error",
+                    "patient_name": stage2.get("patient_details", {}).get("name"),
+                    "patient_age": stage2.get("patient_details", {}).get("age"),
+                    "patient_gender": stage2.get("patient_details", {}).get("gender"),
+                    "diagnosed_condition": stage2.get("diagnosis_and_notes"),
+                    "medicines": [
+                        {
+                            "raw_text": m.get("extracted_raw_text", ""),
+                            "medicine_name": m.get("active_chemical_compound", ""),
+                            "dosage": m.get("dosage", ""),
+                            "frequency": m.get("frequency", ""),
+                            "duration": m.get("duration", ""),
+                            "certainty": "High" if (m.get("confidence_score", 0) or 0) >= 0.7 else ("Medium" if (m.get("confidence_score", 0) or 0) >= 0.4 else "Uncertain / Verify"),
+                            "form": "Tablet",
+                            "instructions": f"{m.get('dosage','')} {m.get('frequency','')} for {m.get('duration','')}",
+                        }
+                        for m in stage2.get("prescribed_medications", [])
+                    ],
+                    "model_used": "Gemini 4-Stage Agent Pipeline",
+                }
+                st.toast("🎉 4-Stage Pipeline completed! Doctor Dashboard generated.")
 
     # Display Extracted Data
     rx_res = st.session_state.get("rx_extraction_result")
@@ -762,6 +764,117 @@ with tab1:
                     unsafe_allow_html=True,
                 )
 
+        # ════════════════════════════════════════════════════════════════
+        # STAGE 3 + STAGE 4: Patient Voice History & Doctor Safety Dashboard
+        # ════════════════════════════════════════════════════════════════
+        _pipeline = st.session_state.get("pipeline_result")
+        if _pipeline:
+            _stage3 = _pipeline.get("stage3_voice_history") or {}
+            _stage4 = _pipeline.get("stage4_doctor_dashboard") or {}
+            _voice_hist = _stage3.get("patient_reported_history", {}) or {}
+
+            st.divider()
+            st.markdown("### 🗣️ Stage 3: Patient Voice History (Gemini Audio NER)")
+            _transcript = _stage3.get("raw_transcript", "")
+            if _transcript:
+                with st.expander("📝 View Full Patient Transcript", expanded=False):
+                    st.markdown(f'> {_transcript}')
+            else:
+                st.caption("No audio was provided — voice history skipped.")
+
+            _vcol1, _vcol2 = st.columns(2)
+            with _vcol1:
+                _allergies = _voice_hist.get("known_allergies", []) or []
+                st.markdown("**🟡 Known Allergies:**")
+                if _allergies:
+                    for a in _allergies:
+                        st.markdown(f'- ⚠️ {a}')
+                else:
+                    st.markdown("- None reported")
+                _conditions = _voice_hist.get("chronic_conditions", []) or []
+                st.markdown("**🩺 Chronic Conditions:**")
+                if _conditions:
+                    for c in _conditions:
+                        st.markdown(f'- {c}')
+                else:
+                    st.markdown("- None reported")
+            with _vcol2:
+                _active_meds = _voice_hist.get("current_active_medications", []) or []
+                st.markdown("**💊 Current Active Medications:**")
+                if _active_meds:
+                    for m in _active_meds:
+                        st.markdown(f'- {m}')
+                else:
+                    st.markdown("- None reported")
+                _side_effects = _voice_hist.get("past_reported_side_effects", []) or []
+                st.markdown("**🚨 Past Reported Side Effects:**")
+                if _side_effects:
+                    for se in _side_effects:
+                        if isinstance(se, dict):
+                            st.markdown(f'- **{se.get("medication_or_class", "")}**: {se.get("reported_reaction", "")}')
+                else:
+                    st.markdown("- None reported")
+
+            # ── Stage 4: Doctor Safety Dashboard ──
+            st.divider()
+            _alert_level = _stage4.get("overall_safety_alert_level", "GREEN")
+            _alert_colors = {"RED": "#dc2626", "AMBER": "#f59e0b", "GREEN": "#16a34a"}
+            _alert_bg = {"RED": "#fef2f2", "AMBER": "#fffbeb", "GREEN": "#f0fdf4"}
+            _alert_icon = {"RED": "🔴", "AMBER": "🟠", "GREEN": "🟢"}
+            _ac = _alert_colors.get(_alert_level, "#16a34a")
+            _ab = _alert_bg.get(_alert_level, "#f0fdf4")
+            _ai = _alert_icon.get(_alert_level, "🟢")
+
+            st.markdown(
+                f'<div style="background:{_ab}; border:2px solid {_ac}; border-radius:14px; padding:20px 24px; margin:10px 0; text-align:center;">'
+                f'<div style="font-size:2.4rem;">{_ai}</div>'
+                f'<div style="font-size:1.5rem; font-weight:800; color:{_ac}; margin-top:6px;">OVERALL SAFETY ALERT: {_alert_level}</div>'
+                f'<div style="font-size:0.9rem; color:#475569; margin-top:4px;">Stage 4 Clinical Reasoning & Doctor Safety Agent</div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+
+            # Clinical Risk Analysis
+            _risks = _stage4.get("clinical_risk_analysis", []) or []
+            st.markdown("#### ⚠️ Clinical Risk Analysis")
+            if _risks:
+                _risk_rows = []
+                for r in _risks:
+                    _risk_rows.append({
+                        "Prescribed Drug": r.get("prescribed_drug", ""),
+                        "Conflict Type": r.get("conflict_type", ""),
+                        "Severity": r.get("severity", ""),
+                        "Risk Description": r.get("risk_description", ""),
+                    })
+                st.dataframe(pd.DataFrame(_risk_rows), use_container_width=True, hide_index=True)
+            else:
+                st.markdown(
+                    '<div class="alert-box safe">✅ No clinical risks detected — prescription is clean for this patient.</div>',
+                    unsafe_allow_html=True,
+                )
+
+            # Doctor Recommendation
+            _rec = _stage4.get("doctor_recommendation", {}) or {}
+            _action = _rec.get("action_required", "CONTINUE")
+            _alts = _rec.get("suggested_alternatives", []) or []
+            st.markdown("#### 👨‍⚕️ Doctor Recommendation")
+            _action_color = {"CONTINUE": "#16a34a", "ADJUST_DOSAGE": "#f59e0b", "REPLACE_MEDICATION": "#dc2626"}
+            st.markdown(
+                f'<div style="padding:12px 16px; background:#f8fafc; border-left:5px solid {_action_color.get(_action, "#16a34a")}; border-radius:8px;">'
+                f'<b>Action Required:</b> <code style="color:{_action_color.get(_action, "#16a34a")};">{_action}</code>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+            if _alts:
+                st.markdown("**💡 Suggested Alternatives:**")
+                for alt in _alts:
+                    st.markdown(f'- {alt}')
+
+            # Clinical Disclaimer
+            _disclaimer = _stage4.get("clinical_disclaimer", "")
+            if _disclaimer:
+                st.caption(f"⚠️ {_disclaimer}")
+
         # Patient Profile Synchronization Card (Linking Tab 1 to Tab 2)
         st.markdown("#### 🔄 Update Patient Information from Prescription (Link to Reports Comparision)")
         st.caption(
@@ -789,18 +902,27 @@ with tab1:
             with col_p1:
                 sync_name = st.text_input(
                     "Patient Full Name:",
-                    value=rx_res.get("patient_name") or current_patient.get("name", "John Doe"),
+                    value=rx_res.get("patient_name") or current_patient.get("name") or "Patient",
                 )
             with col_p2:
                 default_age = rx_res.get("patient_age")
-                try:
-                    default_age_val = int(default_age) if default_age else int(current_patient.get("age", 45))
-                except Exception:
-                    default_age_val = int(current_patient.get("age", 45))
+                patient_age_raw = current_patient.get("age")
+                if default_age is not None:
+                    try:
+                        default_age_val = int(default_age)
+                    except (ValueError, TypeError):
+                        default_age_val = 45
+                elif patient_age_raw is not None:
+                    try:
+                        default_age_val = int(patient_age_raw)
+                    except (ValueError, TypeError):
+                        default_age_val = 45
+                else:
+                    default_age_val = 45
                 sync_age = st.number_input("Age:", value=default_age_val, min_value=1, max_value=120)
             with col_p3:
                 gender_opts = ["Male", "Female", "Other"]
-                curr_g = rx_res.get("patient_gender") or current_patient.get("gender", "Male")
+                curr_g = rx_res.get("patient_gender") or current_patient.get("gender") or "Male"
                 g_idx = gender_opts.index(curr_g) if curr_g in gender_opts else 0
                 sync_gender = st.selectbox("Gender:", gender_opts, index=g_idx)
 
@@ -907,9 +1029,9 @@ with tab1:
             )
             st.success(
                 f"✅ Patient profile for **{sync_name} ({active_pid})** updated without repeating previous values! "
-                f"Prescription stored and linked to **Reports Comparision** tab."
+                f"Prescription stored and linked to **Doctor Clinical Analysis Dashboard**."
             )
-            st.toast("Patient profile updated & linked to Reports Comparision!")
+            st.toast("Patient profile updated & linked to Doctor Clinical Analysis Dashboard!")
             if is_blank_profile:
                 st.rerun()
 
@@ -924,954 +1046,431 @@ with tab1:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 2: OBJECTIVE 2 — PATIENT REPORT COMPARISON & MEDICATION IMPACT ANALYSIS
+# TAB 2: PATIENT POST-MEDICATION FEEDBACK (VOICE & TEXT)
 # ══════════════════════════════════════════════════════════════════════════════
 with tab2:
     st.markdown(
-        '<div class="sec-head">📈 Reports Comparision — Sequential Report Upload & Medication Impact Analysis</div>',
+        '<div class="sec-head">💬 Patient Post-Medication Feedback — Clinical Symptoms & Experience</div>',
         unsafe_allow_html=True,
     )
     st.markdown(
-        "Upload multi-stage laboratory test reports and associate each report with its corresponding medication "
-        "(e.g., **Report 1 with Medicine A** $\\rightarrow$ **Report 2 with Medicine B**). "
-        "The system chronologically compares the before-medication and after-medication values, tracks percentage changes, "
-        "identifies whether patient condition worsened, improved, or stabilized, and plots medication impact trajectories."
+        "After visiting the doctor and taking your prescribed medications, use this section to report any "
+        "symptoms, unexpected reactions, or discomfort. **Type in your experience** below or click one of the quick "
+        "clinical presets. The clinical intelligence engine will evaluate your feedback "
+        "and generate an Adverse Drug Reaction (ADR) causality analysis for your doctor."
     )
 
-    if is_blank_profile:
-        st.markdown(
-            """
-            <div style="padding: 14px 18px; background: #fef3c7; border: 1px solid #fbbf24; border-left: 5px solid #d97706; border-radius: 10px; margin: 14px 0 18px 0;">
-                <div style="font-weight: 700; color: #78350f; margin-bottom: 6px;">🚫 Save Disabled — No Patient Profile Selected</div>
-                <div style="font-size: 0.9rem; color: #78350f; line-height: 1.45;">
-                    Laboratory reports must be linked to a specific patient. All <b>Save buttons below are disabled</b> until you:
-                    <ol style="margin: 6px 0 4px 20px;">
-                        <li>Use the sidebar ➕ <b>Create New Patient Profile</b> expander to set up a record, OR</li>
-                        <li>Select an existing patient (e.g., John Doe / P001) from the sidebar dropdown.</li>
-                    </ol>
-                    You can still pre-fill the biomarker number inputs below — they will be retained when you select a patient.
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    lab_reports = [] if is_blank_profile else current_patient.get("lab_reports", [])
-    med_timeline = [] if is_blank_profile else current_patient.get("medication_timeline", [])
-
-    # ──────────────────────────────────────────────────────────────────────────
-    # SEQUENTIAL REPORT UPLOAD & MEDICATION ASSOCIATION (OBJECTIVE 2 WORKFLOW)
-    # ──────────────────────────────────────────────────────────────────────────
-    st.markdown("### 📤 Sequential Report Upload & Medication Association")
-    st.caption(
-        "Follow the sequential workflow: upload the initial baseline report with its medicine name, "
-        "then upload the follow-up report with the new medicine name to measure therapeutic impact."
+    # Show active prescription medications context if available
+    rx_active = st.session_state.get("rx_extraction_result")
+    active_meds_list: list[dict[str, Any]] = (
+        rx_active.get("medicines", [])
+        if (rx_active and rx_active.get("status") == "success")
+        else []
     )
 
-    col_rep1, col_rep2 = st.columns(2)
-
-    with col_rep1:
+    if active_meds_list:
         st.markdown(
-            """
-            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-top: 4px solid #0284c7; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                <h4 style="margin: 0 0 8px 0; color: #0f172a;">🧪 Step 1: Initial Medical Report & Medicine A</h4>
-                <p style="font-size: 0.84rem; color: #64748b; margin-bottom: 12px;">Baseline laboratory workup prior to or during initial medication regimen.</p>
-            </div>
-            """,
+            '<div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;">'
+            '<b>💊 Active Prescribed Regimen from Tab 1:</b> '
+            + ", ".join([f"<code>{m.get('medicine_name', 'Medication')}</code>" for m in active_meds_list])
+            + '</div>',
             unsafe_allow_html=True,
         )
-        up_rep1 = st.file_uploader(
-            "Upload Report 1 (PNG, JPG, PDF, CSV):",
-            type=["png", "jpg", "jpeg", "pdf", "csv"],
-            key="uploader_report_1",
-            help="Initial / baseline laboratory report file.",
-        )
-        med1_default = st.session_state.get("tab1_linked_med") or "Medicine A: Metformin 500mg BD"
-        med1_name = st.text_input(
-            "Medicine Name for Report 1:",
-            value=med1_default,
-            key="rep1_med_name",
-            help="E.g., Medicine A, Metformin 500mg BD, or Lifestyle observation",
-        )
-        date1_val = st.date_input("Report 1 Test Date:", value=datetime(2024, 11, 15), key="rep1_date")
-
-        st.write("**Key Biomarker Observations for Report 1:**")
-        c1_p1, c1_p2 = st.columns(2)
-        with c1_p1:
-            hba1c_1 = st.number_input("HbA1c (%):", value=8.4, step=0.1, key="rep1_hba1c")
-            sbp_1 = st.number_input("Systolic BP (mmHg):", value=142.0, step=1.0, key="rep1_sbp")
-        with c1_p2:
-            fbg_1 = st.number_input("Fasting Glucose (mg/dL):", value=165.0, step=1.0, key="rep1_fbg")
-            chol_1 = st.number_input("Total Cholesterol (mg/dL):", value=235.0, step=1.0, key="rep1_chol")
-
-        if st.button("💾 Save Report 1 & Medicine A", type="primary", use_container_width=True, key="btn_save_rep1", disabled=is_blank_profile):
-            try:
-                db.add_medication_period(
-                    selected_pid,
-                    period_name=f"Period 1: {med1_name}",
-                    start_date=date1_val.strftime("%Y-%m-%d"),
-                    end_date="2025-02-14",
-                    medications=[med1_name],
-                    clinical_target="Initial diagnostic & therapeutic baseline",
-                )
-                entries1 = [
-                    {
-                        "date": date1_val.strftime("%Y-%m-%d"),
-                        "parameter": "HbA1c",
-                        "value": float(hba1c_1),
-                        "unit": "%",
-                        "reference_range": "4.0 - 5.6",
-                        "condition": "Type 2 Diabetes",
-                        "associated_medication": med1_name,
-                    },
-                    {
-                        "date": date1_val.strftime("%Y-%m-%d"),
-                        "parameter": "Fasting Blood Glucose",
-                        "value": float(fbg_1),
-                        "unit": "mg/dL",
-                        "reference_range": "70.0 - 99.0",
-                        "condition": "Type 2 Diabetes",
-                        "associated_medication": med1_name,
-                    },
-                    {
-                        "date": date1_val.strftime("%Y-%m-%d"),
-                        "parameter": "Systolic Blood Pressure",
-                        "value": float(sbp_1),
-                        "unit": "mmHg",
-                        "reference_range": "90.0 - 120.0",
-                        "condition": "Hypertension",
-                        "associated_medication": med1_name,
-                    },
-                    {
-                        "date": date1_val.strftime("%Y-%m-%d"),
-                        "parameter": "Total Cholesterol",
-                        "value": float(chol_1),
-                        "unit": "mg/dL",
-                        "reference_range": "125.0 - 200.0",
-                        "condition": "Dyslipidemia",
-                        "associated_medication": med1_name,
-                    },
-                ]
-                for ent in entries1:
-                    db.add_lab_report(selected_pid, ent)
-                st.success("✅ Report 1 & Medicine A recorded successfully!")
-                st.toast("Report 1 saved!")
-                st.rerun()
-            except Exception as e:
-                st.error(f"❌ Failed to save Report 1: {str(e)}")
-
-    with col_rep2:
-        st.markdown(
-            """
-            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-top: 4px solid #16a34a; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                <h4 style="margin: 0 0 8px 0; color: #0f172a;">🔬 Step 2: Follow-up Medical Report & Medicine B</h4>
-                <p style="font-size: 0.84rem; color: #64748b; margin-bottom: 12px;">Follow-up laboratory workup after patient initiates or shifts to new medication.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        up_rep2 = st.file_uploader(
-            "Upload Report 2 (PNG, JPG, PDF, CSV):",
-            type=["png", "jpg", "jpeg", "pdf", "csv"],
-            key="uploader_report_2",
-            help="Follow-up laboratory report file.",
-        )
-        med2_name = st.text_input(
-            "Medicine Name for Report 2:",
-            value="Medicine B: Metformin 1000mg + Glimepiride 1mg",
-            key="rep2_med_name",
-            help="E.g., Medicine B, Metformin 1000mg + Glimepiride 1mg, or Glipizide 5mg",
-        )
-        date2_val = st.date_input("Report 2 Test Date:", value=datetime(2025, 2, 15), key="rep2_date")
-
-        st.write("**Key Biomarker Observations for Report 2:**")
-        c2_p1, c2_p2 = st.columns(2)
-        with c2_p1:
-            hba1c_2 = st.number_input("HbA1c (%):", value=7.1, step=0.1, key="rep2_hba1c")
-            sbp_2 = st.number_input("Systolic BP (mmHg):", value=126.0, step=1.0, key="rep2_sbp")
-        with c2_p2:
-            fbg_2 = st.number_input("Fasting Glucose (mg/dL):", value=128.0, step=1.0, key="rep2_fbg")
-            chol_2 = st.number_input("Total Cholesterol (mg/dL):", value=195.0, step=1.0, key="rep2_chol")
-
-        if st.button("💾 Save Report 2 & Medicine B", type="primary", use_container_width=True, key="btn_save_rep2", disabled=is_blank_profile):
-            try:
-                db.add_medication_period(
-                    selected_pid,
-                    period_name=f"Period 2: {med2_name}",
-                    start_date=date2_val.strftime("%Y-%m-%d"),
-                    end_date="2025-09-30",
-                    medications=[med2_name],
-                    clinical_target="Subsequent therapy response evaluation",
-                )
-                entries2 = [
-                    {
-                        "date": date2_val.strftime("%Y-%m-%d"),
-                        "parameter": "HbA1c",
-                        "value": float(hba1c_2),
-                        "unit": "%",
-                        "reference_range": "4.0 - 5.6",
-                        "condition": "Type 2 Diabetes",
-                        "associated_medication": med2_name,
-                    },
-                    {
-                        "date": date2_val.strftime("%Y-%m-%d"),
-                        "parameter": "Fasting Blood Glucose",
-                        "value": float(fbg_2),
-                        "unit": "mg/dL",
-                        "reference_range": "70.0 - 99.0",
-                        "condition": "Type 2 Diabetes",
-                        "associated_medication": med2_name,
-                    },
-                    {
-                        "date": date2_val.strftime("%Y-%m-%d"),
-                        "parameter": "Systolic Blood Pressure",
-                        "value": float(sbp_2),
-                        "unit": "mmHg",
-                        "reference_range": "90.0 - 120.0",
-                        "condition": "Hypertension",
-                        "associated_medication": med2_name,
-                    },
-                    {
-                        "date": date2_val.strftime("%Y-%m-%d"),
-                        "parameter": "Total Cholesterol",
-                        "value": float(chol_2),
-                        "unit": "mg/dL",
-                        "reference_range": "125.0 - 200.0",
-                        "condition": "Dyslipidemia",
-                        "associated_medication": med2_name,
-                    },
-                ]
-                for ent in entries2:
-                    db.add_lab_report(selected_pid, ent)
-                st.success("✅ Report 2 & Medicine B recorded successfully!")
-                st.toast("Report 2 saved & medication impact calculated!")
-                st.rerun()
-            except Exception as e:
-                st.error(f"❌ Failed to save Report 2: {str(e)}")
-
-    # Expander to add subsequent reports (Report 3, 4...) & medicine name
-    with st.expander("➕ Add Subsequent Medical Report (Report 3, 4...) & New Medicine Name", expanded=False):
-        patient_display_name = current_patient.get("name") or "Selected Patient"
-        st.write(
-            f"If the physician changed medication again (e.g., to Medicine C), add another sequential observation for **{patient_display_name}**:"
-        )
-        if is_blank_profile:
-            st.info("ℹ️ Select or create a patient first to enable this section's Save button.")
-        with st.form("form_add_subsequent_lab"):
-            c_s1, c_s2, c_s3 = st.columns(3)
-            with c_s1:
-                sub_param_name = st.selectbox(
-                    "Parameter Name:",
-                    list(impact_analyzer.PARAMETER_METRICS.keys()),
-                    index=0,
-                    key="sub_param_name",
-                )
-                sub_metric_def = impact_analyzer.PARAMETER_METRICS.get(sub_param_name, {})
-            with c_s2:
-                sub_val = st.number_input("Observed Value:", value=6.2, step=0.1, key="sub_val")
-                sub_unit = st.text_input("Unit:", value=sub_metric_def.get("unit", ""), key="sub_unit")
-            with c_s3:
-                sub_date = st.date_input("Test Date:", key="sub_date")
-                sub_ref = st.text_input(
-                    "Reference Range:",
-                    value=f"{sub_metric_def.get('normal_min', '')} - {sub_metric_def.get('normal_max', '')}",
-                    key="sub_ref",
-                )
-
-            sub_med = st.text_input(
-                "Medicine Name for this Subsequent Report:",
-                value="Medicine C: Metformin 1000mg + Empagliflozin 10mg",
-                key="sub_med_name",
-            )
-
-            submit_sub = st.form_submit_button("💾 Append Subsequent Report", type="primary")
-            if submit_sub:
-                if is_blank_profile:
-                    st.warning("⚠️ Please select or create a patient from the sidebar before appending subsequent reports.")
-                else:
-                    try:
-                        sub_entry = {
-                            "date": sub_date.strftime("%Y-%m-%d"),
-                            "parameter": sub_param_name,
-                            "value": float(sub_val),
-                            "unit": sub_unit,
-                            "reference_range": sub_ref,
-                            "condition": sub_metric_def.get("condition", "General Health"),
-                            "associated_medication": sub_med,
-                        }
-                        db.add_lab_report(selected_pid, sub_entry)
-                        st.success("✅ Subsequent report recorded! Trajectory updated.")
-                        st.toast("Subsequent report recorded.")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"❌ Failed to append subsequent report: {str(e)}")
-
-    st.divider()
-
-    # ──────────────────────────────────────────────────────────────────────────
-    # BEFORE / AFTER PARAMETER COMPARISON TABLE (10 COLUMNS REQUIRED)
-    # ──────────────────────────────────────────────────────────────────────────
-    st.markdown("### 📋 Before/After Parameter Comparison Table")
-    st.caption(
-        "Compares before-medication (Report 1) and after-medication (Report 2) values, showing the difference, percentage change, "
-        "associated medication shift, and descriptive interpretation of clinical trajectory."
-    )
-
-    comparison_data = impact_analyzer.compute_parameter_comparison_table(lab_reports, med_timeline)
-    if comparison_data:
-        df_comp_display = pd.DataFrame(comparison_data)[
-            [
-                "Parameter",
-                "Date of Test",
-                "Previous Value",
-                "Current Value",
-                "Unit",
-                "Reference Normal Range",
-                "Difference / Change",
-                "Percentage Change",
-                "Associated Medication",
-                "Condition Monitored",
-                "Trend Interpretation",
-            ]
-        ]
-        st.dataframe(df_comp_display, use_container_width=True, hide_index=True)
     else:
-        st.info("No comparative laboratory reports recorded yet. Upload Report 1 and Report 2 above.")
+        st.info("💡 Tip: Upload or process a prescription in Tab 1 first to cross-reference your specific prescribed medications.")
+
+    st.markdown("### ✍️ Patient Symptoms & Reaction Description")
+    st.caption("Type any symptoms, timing, or issues you noticed after taking your prescribed medication:")
+
+    # Quick preset buttons for instant 1-click clinical testing
+    st.write("**Quick-Fill Clinical Test Presets:**")
+    preset_cols = st.columns(2)
+    with preset_cols[0]:
+        if st.button("🔴 Augmentin: Itchy Rash & Hives", use_container_width=True):
+            st.session_state["post_med_text_input"] = (
+                "I took the Augmentin 625mg tablet 1 hour ago after breakfast. "
+                "Now I have developed severe itching, red rash and hives all over my arms and chest, and feeling nauseous."
+            )
+        if st.button("🟠 Ibuprofen: Severe Burning Stomach Pain", use_container_width=True):
+            st.session_state["post_med_text_input"] = (
+                "Took the prescribed Ibuprofen 400mg for pain 2 hours ago. "
+                "I now have intense burning pain in my upper stomach, acid reflux, and stomach cramps."
+            )
+    with preset_cols[1]:
+        if st.button("🟡 Metformin: Nausea & Diarrhea", use_container_width=True):
+            st.session_state["post_med_text_input"] = (
+                "Started Metformin 500mg with dinner last night. "
+                "Experiencing watery diarrhea, severe abdominal bloating, stomach cramps, and metallic taste."
+            )
+        if st.button("🟢 Routine Recovery: Feeling Well", use_container_width=True):
+            st.session_state["post_med_text_input"] = (
+                "Took prescribed doses as advised. Fever has subsided, cough is much better, "
+                "no rash, no stomach pain, feeling good."
+            )
+
+    typed_feedback = st.text_area(
+        "Patient Symptoms / Reaction Description:",
+        value=st.session_state.get("post_med_text_input", ""),
+        height=140,
+        key="post_med_text_box",
+        placeholder="E.g., I took my morning dose 1 hour ago. I am experiencing a rash on my chest and stomach cramping...",
+    )
 
     st.divider()
 
-    # ──────────────────────────────────────────────────────────────────────────
-    # PARAMETER TIME-SERIES VISUALIZER WITH SHADED MEDICATION BANDS
-    # ──────────────────────────────────────────────────────────────────────────
-    st.markdown("### 📊 Longitudinal Parameter Trajectory & Medication Periods")
-    st.caption(
-        "Time-series chart tracking biomarker trajectory across medication periods with shaded reference range and medication transition bands."
+    # Submit button
+    btn_analyze_post = st.button(
+        "🚀 Submit Patient Feedback & Generate Doctor Analysis",
+        type="primary",
+        use_container_width=True,
     )
 
-    if lab_reports:
-        available_params = sorted({r["parameter"] for r in lab_reports})
-        col_sel_p, col_info_p = st.columns([1.5, 2.5])
+    if btn_analyze_post:
+        text_input_val = typed_feedback.strip() if typed_feedback else ""
 
-        with col_sel_p:
-            selected_param: str = str(
-                st.selectbox("Select Parameter to Plot:", available_params, index=0, key="plot_param_sel")
-                or (available_params[0] if available_params else "HbA1c")
-            )
-
-        with col_info_p:
-            p_metric = impact_analyzer.PARAMETER_METRICS.get(selected_param, {})
-            st.caption(
-                f"**Target Condition:** {p_metric.get('condition', 'General Health')} | "
-                f"**Normal Clinical Reference Range:** {p_metric.get('normal_min', 'N/A')} - {p_metric.get('normal_max', 'N/A')} {p_metric.get('unit', '')}"
-            )
-
-        df_param = impact_analyzer.get_time_series_data_by_parameter(lab_reports, selected_param)
-
-        if not df_param.empty:
-            fig_ts = go.Figure()
-
-            # Normal Range Shaded Green Band
-            norm_min = p_metric.get("normal_min")
-            norm_max = p_metric.get("normal_max")
-            if norm_min is not None and norm_max is not None:
-                fig_ts.add_hrect(
-                    y0=norm_min,
-                    y1=norm_max,
-                    fillcolor="rgba(34, 197, 94, 0.12)",
-                    line_width=0,
-                    annotation_text=f"Normal Target Range ({norm_min} - {norm_max})",
-                    annotation_position="bottom right",
+        if not text_input_val:
+            st.warning("⚠️ Please describe your symptoms or select a clinical preset above before submitting.")
+        else:
+            with st.spinner("🤖 Clinical AI Agent evaluating symptoms & adverse drug reactions..."):
+                meds_for_analysis = (
+                    active_meds_list
+                    if active_meds_list
+                    else current_patient.get("current_medications", [])
                 )
-
-            # Observed Lab Points & Line
-            fig_ts.add_trace(
-                go.Scatter(
-                    x=df_param["date_str"],
-                    y=df_param["value"],
-                    mode="lines+markers+text",
-                    name=selected_param,
-                    line={"color": "#0284c7", "width": 3},
-                    marker={"size": 10, "color": "#0369a1", "line": {"color": "white", "width": 2}},
-                    text=[f"{v:.1f}" for v in df_param["value"]],
-                    textposition="top center",
-                    hovertemplate="<b>Date:</b> %{x}<br><b>Value:</b> %{y} "
-                    + p_metric.get("unit", "")
-                    + "<extra></extra>",
+                post_analysis = orchestrator.run_post_medication_analysis(
+                    feedback_text=text_input_val,
+                    audio_bytes=None,
+                    prescribed_medications=meds_for_analysis,
+                    patient_allergies=current_patient.get("known_allergies", []),
+                    patient_conditions=current_patient.get("known_conditions", []),
                 )
-            )
+                st.session_state["post_med_analysis"] = post_analysis
+                st.session_state["post_med_analysis_patient_id"] = selected_pid
 
-            # Add Vertical / Shaded Medication Phase Dividers
-            period_colors = [
-                "rgba(238, 242, 255, 0.5)",
-                "rgba(254, 243, 199, 0.45)",
-                "rgba(240, 253, 244, 0.5)",
-                "rgba(253, 242, 248, 0.5)",
-            ]
-            for idx, period in enumerate(med_timeline):
-                p_start = period.get("start_date")
-                p_end = period.get("end_date")
+            st.success("✅ Patient feedback analyzed successfully! Doctor Clinical Dashboard updated.")
+            st.toast("🎉 Analysis complete! Please switch to the Doctor Clinical Analysis Dashboard tab.")
 
-                fig_ts.add_vrect(
-                    x0=p_start,
-                    x1=p_end,
-                    fillcolor=period_colors[idx % len(period_colors)],
-                    line={"color": "rgba(100, 116, 139, 0.3)", "width": 1, "dash": "dot"},
-                    annotation_text=f"<b>{period.get('period_id')}</b>",
-                    annotation_position="top left",
-                    layer="below",
-                )
-
-            fig_ts.update_layout(
-                title=f"Chronological Trajectory: {selected_param} across Medication Periods",
-                xaxis_title="Date of Lab Report",
-                yaxis_title=f"{selected_param} ({p_metric.get('unit', '')})",
-                height=420,
-                margin={"l": 20, "r": 20, "t": 50, "b": 30},
-                plot_bgcolor="white",
-                paper_bgcolor="white",
-                font={"family": "Inter", "size": 12},
-            )
-            fig_ts.update_xaxes(showgrid=True, gridcolor="#f1f5f9")
-            fig_ts.update_yaxes(showgrid=True, gridcolor="#f1f5f9")
-            st.plotly_chart(fig_ts, use_container_width=True)
+    # Show inline summary if analysis exists
+    curr_analysis = st.session_state.get("post_med_analysis")
+    if curr_analysis and curr_analysis.get("status") == "SUCCESS":
+        st.markdown("### 📊 Immediate Patient Feedback Summary")
+        _al = curr_analysis.get("alert_level", "GREEN")
+        _badge_col = "#dc2626" if _al == "RED" else ("#f59e0b" if _al == "AMBER" else "#16a34a")
+        st.markdown(
+            f'<div style="border-left: 6px solid {_badge_col}; background: #f8fafc; padding: 14px 18px; border-radius: 8px; margin: 12px 0;">'
+            f'<div style="font-weight: 700; color: {_badge_col}; font-size: 1.1rem;">Clinical Assessment: {curr_analysis.get("causality_assessment")}</div>'
+            f'<div style="font-size: 0.92rem; color: #334155; margin-top: 6px;"><b>Suspected Drug:</b> {curr_analysis.get("suspected_medication")}</div>'
+            f'<div style="font-size: 0.92rem; color: #475569; margin-top: 4px;"><b>Reported Symptoms:</b> {", ".join(curr_analysis.get("reported_symptoms", []))}</div>'
+            f'<div style="font-size: 0.92rem; color: #0284c7; margin-top: 8px;">👉 <b>Full details, physician recommendations, and emergency warnings are displayed in the 🩺 Doctor Clinical Analysis Dashboard tab.</b></div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# ══════════════════════════════════════════════════════════════════════════════
-# TAB 3: REPORT ANALYSIS — POWER BI HEALTHCARE DASHBOARD & PREDICTIVE ANALYTICS
+# TAB 3: DOCTOR CLINICAL ANALYSIS DASHBOARD
 # ══════════════════════════════════════════════════════════════════════════════
 with tab3:
     st.markdown(
-        '<div class="sec-head">📊 Report Analysis — Power BI Healthcare Dashboard & Predictive Health Analytics</div>',
+        '<div class="sec-head">🩺 Doctor Clinical Analysis Dashboard — Comprehensive Medical Intelligence</div>',
         unsafe_allow_html=True,
     )
     st.markdown(
-        "Interactive Power BI Healthcare Analytics Command Center combining longitudinal report analysis, "
-        "medication regimen roadmaps, and **Predictive Health Analytics** for biomarker trajectory forecasting, "
-        "time-to-normalcy estimation, and clinical risk stratification. All visual analytics are exportable for **Power BI Desktop**."
+        "Executive Physician Decision Support Command Center. This dashboard synthesizes the "
+        "**handwritten prescription extraction**, **patient medical history & allergies**, and **post-medication voice & text feedback** "
+        "into actionable clinical guidance, adverse drug reaction (ADR) causality analysis, and safe alternative recommendations."
     )
 
-    if is_blank_profile:
+    rx_res_dash = st.session_state.get("rx_extraction_result")
+    post_res_dash = st.session_state.get("post_med_analysis")
+    pipeline_res_dash = st.session_state.get("pipeline_result")
+
+    # If neither has been run yet
+    if not rx_res_dash and not post_res_dash:
         st.markdown(
             """
             <div style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 48px 32px; text-align: center; margin: 24px 0;">
-                <div style="font-size: 3.2rem; margin-bottom: 16px;">📊</div>
-                <h3 style="color: #334155; margin: 0 0 12px 0;">Report Analysis Dashboard Inactive</h3>
+                <div style="font-size: 3.2rem; margin-bottom: 16px;">🩺</div>
+                <h3 style="color: #334155; margin: 0 0 12px 0;">Doctor Clinical Analysis Dashboard Waiting for Inputs</h3>
                 <p style="color: #64748b; font-size: 1rem; margin: 0 auto; max-width: 620px; line-height: 1.6;">
-                    No patient profile and no laboratory reports are currently loaded.
-                    <br><br>
-                    <b>To begin Report Analysis:</b>
-                    <br>1️⃣ Select an existing patient from the sidebar dropdown
-                    <br>2️⃣ Or upload sequential reports in the <b>Reports Comparision</b> tab
-                    <br>3️⃣ Return here to view longitudinal analytics, KPIs, and forecasting
+                    To generate the clinical dashboard:
+                    <br>1️⃣ Go to <b>📝 Handwritten Prescription & Voice Assistant</b> and run the 4-Stage extraction.
+                    <br>2️⃣ Go to <b>💬 Patient Post-Medication Feedback</b> to record or type patient post-visit symptoms.
+                    <br>3️⃣ Return here to review the synthesized clinical assessment, ADR causality, and doctor action plan.
                 </p>
             </div>
             """,
             unsafe_allow_html=True,
         )
     else:
-        comparison_data = impact_analyzer.compute_parameter_comparison_table(lab_reports, med_timeline)
+        # Determine Overall Alert Level across prescription verification + post-medication feedback
+        overall_level = "GREEN"
+        triage_message = "Prescription safe. Routine clinical follow-up."
+        triage_color = "#16a34a"
+        triage_bg = "#f0fdf4"
+        triage_icon = "🟢"
 
-        # ── Interactive Dashboard Filters (always rendered in scope; type-checker sees ONE canonical assignment) ──
-        st.markdown("#### 🎛️ Dynamic Clinical Filters")
-        flt_col1, flt_col2, flt_col3 = st.columns([1.2, 1.2, 1.6])
+        # Check post-medication alert level
+        if post_res_dash and post_res_dash.get("status") == "SUCCESS":
+            pm_level = post_res_dash.get("alert_level", "GREEN")
+            if pm_level == "RED":
+                overall_level = "RED"
+                triage_message = "CRITICAL ALERT: Suspected Adverse Drug Reaction / Hypersensitivity. Immediate drug discontinuation advised."
+                triage_color = "#dc2626"
+                triage_bg = "#fef2f2"
+                triage_icon = "🔴"
+            elif pm_level == "AMBER" and overall_level != "RED":
+                overall_level = "AMBER"
+                triage_message = "WARNING: Moderate drug intolerance or side effect reported. Dosage adjustment or gastroprotection recommended."
+                triage_color = "#f59e0b"
+                triage_bg = "#fffbeb"
+                triage_icon = "🟠"
 
-        all_conditions_in_patient: list[str] = []
-        all_meds_in_patient: list[str] = []
-        all_biomarkers: list[str] = []
-        if lab_reports:
-            all_conditions_in_patient = sorted({r.get("condition", "General Health") for r in lab_reports if r.get("condition")})
-            all_meds_in_patient = sorted({r.get("associated_medication", "General Care") for r in lab_reports if r.get("associated_medication")})
-            all_biomarkers = sorted({r["parameter"] for r in lab_reports})
+        # Check stage 4 pipeline alert level
+        if pipeline_res_dash and pipeline_res_dash.get("stage4_doctor_dashboard"):
+            s4_level = pipeline_res_dash["stage4_doctor_dashboard"].get("overall_safety_alert_level", "GREEN")
+            if s4_level == "RED":
+                overall_level = "RED"
+                triage_message = "CRITICAL ALERT: Drug-Allergy or Contraindication Conflict identified on prescription."
+                triage_color = "#dc2626"
+                triage_bg = "#fef2f2"
+                triage_icon = "🔴"
+            elif s4_level == "AMBER" and overall_level != "RED":
+                overall_level = "AMBER"
+                triage_message = "WARNING: Potential drug interaction or precaution detected on prescription."
+                triage_color = "#f59e0b"
+                triage_bg = "#fffbeb"
+                triage_icon = "🟠"
 
-        with flt_col1:
-            cond_filter = st.selectbox(
-                "Filter by Condition:",
-                options=["All Conditions", *all_conditions_in_patient],
-                index=0,
-                disabled=not lab_reports,
-                help="Filter analytics to a specific clinical condition",
+        # Top Executive Banner
+        st.markdown(
+            f"""
+            <div style="background:{triage_bg}; border:2px solid {triage_color}; border-radius:14px; padding:22px 26px; margin:14px 0 20px 0;">
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="font-size:2.8rem;">{triage_icon}</div>
+                    <div>
+                        <div style="font-size:1.45rem; font-weight:800; color:{triage_color};">OVERALL CLINICAL SAFETY STATUS: {overall_level}</div>
+                        <div style="font-size:0.96rem; color:#334155; margin-top:4px; font-weight:500;">{triage_message}</div>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # 3 KPI Cards
+        kpi_c1, kpi_c2, kpi_c3 = st.columns(3)
+        with kpi_c1:
+            rx_count = len(rx_res_dash.get("medicines", [])) if rx_res_dash else 0
+            st.markdown(
+                f"""
+                <div class="kpi-card">
+                    <div class="kpi-val">{rx_count}</div>
+                    <div class="kpi-lbl">Prescribed Drugs Digitized</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
-        with flt_col2:
-            med_filter = st.selectbox(
-                "Filter by Medication:",
-                options=["All Medications", *all_meds_in_patient],
-                index=0,
-                disabled=not lab_reports,
-                help="Filter analytics to an associated medication period",
+        with kpi_c2:
+            sym_count = len(post_res_dash.get("reported_symptoms", [])) if post_res_dash else 0
+            st.markdown(
+                f"""
+                <div class="kpi-card {'amber' if sym_count > 0 else 'green'}">
+                    <div class="kpi-val">{sym_count}</div>
+                    <div class="kpi-lbl">Reported Adverse Symptoms</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
-        with flt_col3:
-            default_bio = all_biomarkers[:4] if len(all_biomarkers) >= 4 else all_biomarkers
-            selected_biomarkers: list[str] = list(
-                st.multiselect(
-                    "Filter Biomarkers for Visual Analytics:",
-                    options=all_biomarkers,
-                    default=default_bio,
-                    disabled=not lab_reports,
-                )
+        with kpi_c3:
+            adr_status = (
+                post_res_dash.get("causality_assessment", "None")
+                if post_res_dash
+                else "No Post-Visit Issue"
             )
-
-        # Single canonical computation of filtered_reports (dominates all downstream usage sites)
-        filtered_reports: list[dict[str, Any]] = list(lab_reports)
-        if lab_reports:
-            if cond_filter != "All Conditions":
-                filtered_reports = [r for r in filtered_reports if r.get("condition") == cond_filter]
-            if med_filter != "All Medications":
-                filtered_reports = [r for r in filtered_reports if r.get("associated_medication") == med_filter]
-
-        st.write("")
-
-        if not lab_reports:
-            st.info(
-                "💡 No laboratory reports are currently recorded for this patient. "
-                "Navigate to the **Reports Comparision** tab to upload and associate baseline and follow-up diagnostic reports, then return to view comparative analytics."
+            st.markdown(
+                f"""
+                <div class="kpi-card {'red' if overall_level == 'RED' else ('amber' if overall_level == 'AMBER' else 'green')}">
+                    <div class="kpi-val" style="font-size: 1.15rem; font-weight:700; margin-top:6px;">{adr_status}</div>
+                    <div class="kpi-lbl">ADR Assessment Status</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
-        else:
-            # Top KPI Cards Strip
-            st.markdown("### 1 · Key Clinical Health Indicators (Current Status)")
-            kpi_cols = st.columns(5)
-
-            # Calculate latest parameter values
-            latest_params = {}
-            for r in sorted(filtered_reports, key=lambda x: x.get("date", "")):
-                latest_params[r["parameter"]] = r
-
-            hba1c_latest = latest_params.get("HbA1c")
-            fbg_latest = latest_params.get("Fasting Blood Glucose")
-            sbp_latest = latest_params.get("Systolic Blood Pressure")
-            chol_latest = latest_params.get("Total Cholesterol")
-            creat_latest = latest_params.get("Serum Creatinine")
-
-            with kpi_cols[0]:
-                val = f"{hba1c_latest['value']}%" if hba1c_latest else "N/A"
-                cls = "green" if (hba1c_latest and hba1c_latest["value"] <= 6.5) else "red"
-                st.markdown(
-                    f'<div class="kpi-card {cls}"><div class="kpi-val">{val}</div><div class="kpi-lbl">HbA1c (Glycemic)</div><div class="kpi-sub">Target: &lt; 6.5%</div></div>',
-                    unsafe_allow_html=True,
-                )
-
-            with kpi_cols[1]:
-                val = f"{fbg_latest['value']:.0f}" if fbg_latest else "N/A"
-                cls = "green" if (fbg_latest and fbg_latest["value"] <= 110) else "amber"
-                st.markdown(
-                    f'<div class="kpi-card {cls}"><div class="kpi-val">{val}</div><div class="kpi-lbl">Fasting Glucose (mg/dL)</div><div class="kpi-sub">Target: 70 - 99</div></div>',
-                    unsafe_allow_html=True,
-                )
-
-            with kpi_cols[2]:
-                val = f"{sbp_latest['value']:.0f}" if sbp_latest else "N/A"
-                cls = "green" if (sbp_latest and sbp_latest["value"] <= 125) else "amber"
-                st.markdown(
-                    f'<div class="kpi-card {cls}"><div class="kpi-val">{val}</div><div class="kpi-lbl">Systolic BP (mmHg)</div><div class="kpi-sub">Target: &lt; 120</div></div>',
-                    unsafe_allow_html=True,
-                )
-
-            with kpi_cols[3]:
-                val = f"{chol_latest['value']:.0f}" if chol_latest else "N/A"
-                cls = "green" if (chol_latest and chol_latest["value"] <= 200) else "red"
-                st.markdown(
-                    f'<div class="kpi-card {cls}"><div class="kpi-val">{val}</div><div class="kpi-lbl">Total Cholesterol (mg/dL)</div><div class="kpi-sub">Target: &lt; 200</div></div>',
-                    unsafe_allow_html=True,
-                )
-
-            with kpi_cols[4]:
-                val = f"{creat_latest['value']:.2f}" if creat_latest else "N/A"
-                cls = "green" if (creat_latest and creat_latest["value"] <= 1.2) else "amber"
-                st.markdown(
-                    f'<div class="kpi-card {cls}"><div class="kpi-val">{val}</div><div class="kpi-lbl">Serum Creatinine (mg/dL)</div><div class="kpi-sub">Target: 0.7 - 1.3</div></div>',
-                    unsafe_allow_html=True,
-                )
-
-            st.write("")
-            st.divider()
-
-        # Section 2: Medication Impact Timeline & Comparison Grid (Prescription data REMOVED from Report Analysis per requirement)
-        st.markdown("### 2 · Medication Impact Timeline & Regimen Shifts")
-
-        col_tline, col_barchart = st.columns([1.2, 1])
-
-        with col_tline:
-            st.markdown('<div class="panel-card">', unsafe_allow_html=True)
-            st.markdown("#### 📅 Chronological Medication Regimen Roadmap")
-            if med_timeline:
-                for period in med_timeline:
-                    with st.expander(
-                        f"📍 {period.get('period_name')} ({period.get('start_date')} to {period.get('end_date')})",
-                        expanded=True,
-                    ):
-                        st.write(f"**Target:** {period.get('clinical_target', 'N/A')}")
-                        st.write("**Medications in this interval:**")
-                        for med_item in period.get("medications", []):
-                            st.markdown(f"- 💊 `{med_item}`")
-            else:
-                st.caption("No medication timeline recorded. Upload reports in Reports Comparision tab.")
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        with col_barchart:
-            st.markdown('<div class="panel-card">', unsafe_allow_html=True)
-            st.markdown("#### 📊 Parameter Comparison Across Medication Periods")
-
-            if lab_reports:
-                comp_summary = []
-                target_biomarkers = selected_biomarkers or [
-                    "HbA1c",
-                    "Fasting Blood Glucose",
-                    "Systolic Blood Pressure",
-                    "Total Cholesterol",
-                ]
-                for p_name in target_biomarkers:
-                    p_rows = [r for r in filtered_reports if r["parameter"] == p_name]
-                    if len(p_rows) >= 2:
-                        p_rows_sorted = sorted(p_rows, key=lambda x: x["date"])
-                        comp_summary.append(
-                            {
-                                "Parameter": p_name,
-                                "Baseline (Pre-Treatment)": p_rows_sorted[0]["value"],
-                                "Current (Post-Treatment)": p_rows_sorted[-1]["value"],
-                            }
-                        )
-
-                if comp_summary:
-                    df_bar_comp = pd.DataFrame(comp_summary)
-                    fig_bar = go.Figure()
-                    fig_bar.add_trace(
-                        go.Bar(
-                            x=df_bar_comp["Parameter"],
-                            y=df_bar_comp["Baseline (Pre-Treatment)"],
-                            name="Baseline (Pre-Treatment)",
-                            marker_color="#ef4444",
-                        )
-                    )
-                    fig_bar.add_trace(
-                        go.Bar(
-                            x=df_bar_comp["Parameter"],
-                            y=df_bar_comp["Current (Post-Treatment)"],
-                            name="Current (Post-Treatment)",
-                            marker_color="#22c55e",
-                        )
-                    )
-                    fig_bar.update_layout(
-                        barmode="group",
-                        height=340,
-                        margin={"l": 10, "r": 10, "t": 20, "b": 30},
-                        legend={"orientation": "h", "y": -0.2},
-                        plot_bgcolor="white",
-                        paper_bgcolor="white",
-                    )
-                    st.plotly_chart(fig_bar, use_container_width=True)
-                else:
-                    st.info("Select biomarkers with multiple visit reports to view before/after comparison bar chart.")
-            else:
-                st.caption("No laboratory data available for comparison chart.")
-            st.markdown("</div>", unsafe_allow_html=True)
 
         st.divider()
 
-        # Section 3: Condition Monitoring Table & Allergy Safety
-        st.markdown("### 3 · Condition Monitoring & Allergy Safety Matrix")
+        # SECTION 1: Digitized Prescription & Patient Intake
+        col_p1, col_p2 = st.columns([1.1, 1])
 
-        col_cond, col_all = st.columns([1.3, 1])
-
-        with col_cond:
-            st.markdown('<div class="panel-card">', unsafe_allow_html=True)
-            st.markdown("#### 🩺 Condition Monitoring Trajectory Matrix")
-            if lab_reports:
-                cond_rows = []
-                for p_name, p_def in impact_analyzer.PARAMETER_METRICS.items():
-                    p_obs = [r for r in filtered_reports if r["parameter"] == p_name]
-                    if p_obs:
-                        p_obs_sorted = sorted(p_obs, key=lambda x: x["date"])
-                        first_val = p_obs_sorted[0]["value"]
-                        last_val = p_obs_sorted[-1]["value"]
-                        delta = last_val - first_val
-
-                        if abs(delta) < 0.1:
-                            trend_icon = "➡️ Stable"
-                        elif (delta < 0 and p_def.get("lower_is_better")) or (delta > 0 and not p_def.get("lower_is_better")):
-                            trend_icon = "🟢 Favorable Trajectory"
-                        else:
-                            trend_icon = "🔴 Elevated"
-
-                        cond_rows.append(
-                            {
-                                "Monitored Condition": p_def.get("condition"),
-                                "Biomarker": p_name,
-                                "Baseline": f"{first_val:.1f}",
-                                "Current": f"{last_val:.1f} {p_def.get('unit')}",
-                                "Reference Range": f"{p_def.get('normal_min')} - {p_def.get('normal_max')}",
-                                "Observed Trajectory": trend_icon,
-                            }
-                        )
-
-                if cond_rows:
-                    st.dataframe(pd.DataFrame(cond_rows), use_container_width=True, hide_index=True)
-                else:
-                    st.info("No parameters match the active filter criteria.")
+        with col_p1:
+            st.markdown("### 📋 1. Digitized Prescription Regimen")
+            if rx_res_dash and rx_res_dash.get("status") == "success":
+                st.caption(
+                    f"Patient: **{rx_res_dash.get('patient_name') or 'N/A'}** | "
+                    f"Age/Sex: **{rx_res_dash.get('patient_age') or '—'} yrs / {rx_res_dash.get('patient_gender') or '—'}**"
+                )
+                if rx_res_dash.get("diagnosed_condition"):
+                    st.info(f"🩺 **Clinical Diagnosis:** {rx_res_dash.get('diagnosed_condition')}")
+                meds_table_data = []
+                for m in rx_res_dash.get("medicines", []):
+                    meds_table_data.append({
+                        "Prescribed Drug / Active Compound": m.get("medicine_name", ""),
+                        "Dosage": m.get("dosage", ""),
+                        "Frequency": m.get("frequency", ""),
+                        "Duration": m.get("duration", ""),
+                        "Certainty": m.get("certainty", ""),
+                    })
+                if meds_table_data:
+                    st.dataframe(pd.DataFrame(meds_table_data), use_container_width=True, hide_index=True)
             else:
-                st.caption("No laboratory records available for trajectory matrix.")
-            st.markdown("</div>", unsafe_allow_html=True)
+                st.caption("No prescription image processed yet. Upload in Tab 1.")
 
-        with col_all:
-            st.markdown('<div class="panel-card">', unsafe_allow_html=True)
-            st.markdown("#### 🛡️ Patient Allergies & Clinical Warning Alerts")
+        with col_p2:
+            st.markdown("### 👤 2. Pre-Consultation History & Allergies")
+            st.markdown("**Documented Drug Allergies:**")
+            curr_allergies = current_patient.get("known_allergies", [])
+            if curr_allergies:
+                for a in curr_allergies:
+                    is_none = a in ["None documented", "No known drug allergies", "None"]
+                    b_col = "#16a34a" if is_none else "#dc2626"
+                    st.markdown(f"- ⚠️ <span style='color:{b_col}; font-weight:600;'>{a}</span>", unsafe_allow_html=True)
+            else:
+                st.markdown("- *None documented*")
 
-            st.write("**Known Drug Allergies:**")
-            allergies = current_patient.get("known_allergies", [])
-            if allergies and allergies != ["None documented", "No known drug allergies"]:
-                for a in allergies:
+            st.markdown("**Documented Chronic Conditions:**")
+            curr_conditions = current_patient.get("known_conditions", [])
+            if curr_conditions:
+                for c in curr_conditions:
+                    st.markdown(f"- 🩺 {c}")
+            else:
+                st.markdown("- *None documented*")
+
+            # Initial Voice transcript if available
+            if pipeline_res_dash and pipeline_res_dash.get("stage3_voice_history"):
+                s3_trans = pipeline_res_dash["stage3_voice_history"].get("raw_transcript")
+                if s3_trans:
+                    with st.expander("🎙️ Pre-Visit Voice Transcript", expanded=False):
+                        st.markdown(f"> *{s3_trans}*")
+
+        st.divider()
+
+        # SECTION 2: Post-Medication Patient Symptoms & ADR Causality Analysis
+        st.markdown("### 🔍 3. Post-Medication Adverse Drug Reaction (ADR) Causality")
+
+        if post_res_dash and post_res_dash.get("status") == "SUCCESS":
+            c_adr1, c_adr2 = st.columns([1, 1])
+
+            with c_adr1:
+                st.markdown("#### 🗣️ Patient Reported Experience")
+                raw_fb = post_res_dash.get("raw_feedback", "")
+                if raw_fb:
                     st.markdown(
-                        f'<div class="alert-box critical">⚠️ <b>Allergy:</b> {a} (Immediate Hypersensitivity Risk)</div>',
+                        f"""
+                        <div style="background:#f1f5f9; border-left:4px solid #0284c7; padding:12px 16px; border-radius:6px; font-style:italic;">
+                            "{raw_fb}"
+                        </div>
+                        """,
                         unsafe_allow_html=True,
                     )
-            else:
+                st.markdown("**Extracted Symptoms:**")
+                sym_list = post_res_dash.get("reported_symptoms", [])
+                if sym_list:
+                    for s in sym_list:
+                        st.markdown(f"- 🚨 **{s}**")
+                else:
+                    st.markdown("- *None extracted*")
+
+            with c_adr2:
+                st.markdown("#### 🔬 Pharmacological Causality & Mechanism")
                 st.markdown(
-                    '<div class="alert-box safe">✅ No known drug allergies documented.</div>', unsafe_allow_html=True
-                )
-
-            st.write("**Documented Adverse Drug Reactions:**")
-            adv = current_patient.get("adverse_reactions", [])
-            if adv and adv != ["None"]:
-                for ad in adv:
-                    st.markdown(
-                        f'<div class="alert-box warning">🚫 <b>Adverse Reaction:</b> {ad}</div>', unsafe_allow_html=True
-                    )
-            else:
-                st.caption("No adverse reactions recorded.")
-
-            st.write("**Clinical Guidelines:**")
-            st.info(
-                "Clinicians should verify renal clearance (eGFR) prior to escalating biguanide or SGLT2 inhibitor doses."
-            )
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        st.divider()
-
-        # Section 4: Predictive Health Analytics & Trajectory Forecasting
-        st.markdown("### 4 · 🔮 Predictive Health Analytics & Biomarker Trajectory Forecasting")
-        st.markdown(
-            "Leverages longitudinal patient regression velocities across medication intervals to forecast future biomarker levels "
-            "at 30, 60, and 90 days. Provides risk stratification, target normalcy projections, and what-if clinical simulations."
-        )
-
-        col_pred_sel, col_pred_info = st.columns([1.5, 2.5])
-        with col_pred_sel:
-            target_pred_param = st.selectbox(
-                "Select Biomarker for Trajectory Forecasting:",
-                options=[
-                    "HbA1c",
-                    "Fasting Blood Glucose",
-                    "Systolic Blood Pressure",
-                    "Total Cholesterol",
-                    "Serum Creatinine",
-                ],
-                index=0,
-                key="pred_param_selector",
-            )
-        with col_pred_info:
-            p_metric_info = impact_analyzer.PARAMETER_METRICS.get(target_pred_param, {})
-            st.caption(
-                f"**Condition:** {p_metric_info.get('condition')} | **Target Range:** {p_metric_info.get('normal_min')} - {p_metric_info.get('normal_max')} {p_metric_info.get('unit')} | "
-                f"**Clinical Direction:** {'Lower is better' if p_metric_info.get('lower_is_better') else 'Higher is better'}"
-            )
-
-        pred_res = impact_analyzer.predict_parameter_trajectory(filtered_reports, target_pred_param)
-
-        if pred_res.get("status") == "success":
-            f_pts = pred_res.get("forecast_points", [])
-            curr_v = pred_res.get("current_value", 0.0)
-            f_30 = f_pts[0]["forecast_value"] if len(f_pts) > 0 else curr_v
-            f_60 = f_pts[1]["forecast_value"] if len(f_pts) > 1 else curr_v
-            f_90 = f_pts[2]["forecast_value"] if len(f_pts) > 2 else curr_v
-
-            kpi_p1, kpi_p2, kpi_p3, kpi_p4 = st.columns(4)
-            unit = p_metric_info.get("unit", "")
-            with kpi_p1:
-                st.markdown(
-                    f'<div class="kpi-card"><div class="kpi-val">{curr_v:.1f} {unit}</div><div class="kpi-lbl">Current Observed</div><div class="kpi-sub">Date: {pred_res.get("current_date")}</div></div>',
+                    f"**Suspected Offending Drug:** <code style='font-size:1rem; color:#dc2626;'>{post_res_dash.get('suspected_medication', 'None')}</code>",
                     unsafe_allow_html=True,
                 )
-            with kpi_p2:
                 st.markdown(
-                    f'<div class="kpi-card green"><div class="kpi-val">{f_30:.1f} {unit}</div><div class="kpi-lbl">+30 Days Projected</div><div class="kpi-sub">Est: {f_pts[0]["forecast_date"] if f_pts else "—"}</div></div>',
+                    f"**Causality Likelihood:** <b>{post_res_dash.get('causality_assessment', 'N/A')}</b>",
                     unsafe_allow_html=True,
                 )
-            with kpi_p3:
+                st.markdown("**Biological Mechanism:**")
                 st.markdown(
-                    f'<div class="kpi-card green"><div class="kpi-val">{f_60:.1f} {unit}</div><div class="kpi-lbl">+60 Days Projected</div><div class="kpi-sub">Est: {f_pts[1]["forecast_date"] if len(f_pts) > 1 else "—"}</div></div>',
-                    unsafe_allow_html=True,
-                )
-            with kpi_p4:
-                st.markdown(
-                    f'<div class="kpi-card purple"><div class="kpi-val">{f_90:.1f} {unit}</div><div class="kpi-lbl">+90 Days Projected</div><div class="kpi-sub">Est: {f_pts[2]["forecast_date"] if len(f_pts) > 2 else "—"}</div></div>',
+                    f"<p style='font-size:0.92rem; color:#475569;'>{post_res_dash.get('pharmacological_mechanism', '')}</p>",
                     unsafe_allow_html=True,
                 )
 
-            st.write("")
-            st.info(
-                f"🎯 **Target Normalcy Projection:** {pred_res.get('target_achievement_estimate')}\n\n"
-                f"⚡ **Monthly Velocity:** `{pred_res.get('monthly_velocity'):+.2f} {unit}/month` &nbsp;|&nbsp; "
-                f"💊 **Therapeutic Response Efficacy:** `{pred_res.get('efficacy_rating')}`"
-            )
+            st.markdown("---")
 
-            df_hist = impact_analyzer.get_time_series_data_by_parameter(filtered_reports, target_pred_param)
-            if not df_hist.empty:
-                fig_pred = go.Figure()
+            # SECTION 3: Actionable Doctor Recommendations
+            st.markdown("### 👨‍⚕️ 4. Actionable Physician Recommendations & Treatment Plan")
 
-                n_min = p_metric_info.get("normal_min")
-                n_max = p_metric_info.get("normal_max")
-                if n_min is not None and n_max is not None:
-                    fig_pred.add_hrect(
-                        y0=n_min,
-                        y1=n_max,
-                        fillcolor="rgba(34, 197, 94, 0.12)",
-                        line_width=0,
-                        annotation_text=f"Normal Target ({n_min} - {n_max})",
-                        annotation_position="bottom right",
-                    )
+            c_rec1, c_rec2 = st.columns(2)
 
-                fig_pred.add_trace(
-                    go.Scatter(
-                        x=df_hist["date_str"],
-                        y=df_hist["value"],
-                        mode="lines+markers+text",
-                        name="Observed Clinical History",
-                        line={"color": "#0284c7", "width": 3},
-                        marker={"size": 10, "color": "#0369a1"},
-                        text=[f"{v:.1f}" for v in df_hist["value"]],
-                        textposition="top center",
-                    )
-                )
+            with c_rec1:
+                st.markdown("#### ⚡ Immediate Clinical Interventions")
+                doc_recs = post_res_dash.get("doctor_recommendations", [])
+                if doc_recs:
+                    for idx, r in enumerate(doc_recs, 1):
+                        st.markdown(f"**{idx}.** {r}")
+                else:
+                    st.markdown("- Continue routine therapy under observation.")
 
-                last_hist_date = df_hist["date_str"].iloc[-1]
-                forecast_x = [last_hist_date] + [p["forecast_date"] for p in f_pts]
-                forecast_y = [curr_v] + [p["forecast_value"] for p in f_pts]
-                forecast_upper = [curr_v] + [p["upper_bound"] for p in f_pts]
-                forecast_lower = [curr_v] + [p["lower_bound"] for p in f_pts]
+                st.markdown("#### 🚨 Emergency Red Flag Warnings")
+                r_flags = post_res_dash.get("emergency_red_flags", [])
+                if r_flags:
+                    for rf in r_flags:
+                        st.markdown(f"- ⚠️ <span style='color:#dc2626;'>{rf}</span>", unsafe_allow_html=True)
+                else:
+                    st.markdown("- No critical emergency red flags reported.")
 
-                fig_pred.add_trace(
-                    go.Scatter(
-                        x=forecast_x + forecast_x[::-1],
-                        y=forecast_upper + forecast_lower[::-1],
-                        fill="toself",
-                        fillcolor="rgba(124, 58, 237, 0.12)",
-                        line={"color": "rgba(255,255,255,0)"},
-                        name="Forecast Confidence Interval (95%)",
-                        showlegend=True,
-                        hoverinfo="skip",
-                    )
-                )
+            with c_rec2:
+                st.markdown("#### 💡 Recommended Safe Alternative Medications")
+                alts = post_res_dash.get("suggested_alternatives", [])
+                if alts:
+                    for a in alts:
+                        st.markdown(f"- 💊 **{a}**")
+                else:
+                    st.markdown("- No alternative medication needed at this time.")
 
-                fig_pred.add_trace(
-                    go.Scatter(
-                        x=forecast_x,
-                        y=forecast_y,
-                        mode="lines+markers+text",
-                        name="Projected Trajectory (Under Active Regimen)",
-                        line={"color": "#7c3aed", "width": 3, "dash": "dash"},
-                        marker={"size": 10, "color": "#7c3aed", "symbol": "diamond"},
-                        text=[f"{v:.1f} (Proj)" for v in forecast_y],
-                        textposition="top center",
-                    )
-                )
+                st.markdown("#### 🛡️ Symptomatic Relief Therapies")
+                relief = post_res_dash.get("symptomatic_relief", [])
+                if relief:
+                    for rel in relief:
+                        st.markdown(f"- 🩺 {rel}")
+                else:
+                    st.markdown("- Routine supportive care.")
 
-                fig_pred.update_layout(
-                    title=f"Predictive Trajectory Forecast: {target_pred_param} (Observed vs 90-Day Projection)",
-                    xaxis_title="Date",
-                    yaxis_title=f"{target_pred_param} ({unit})",
-                    height=430,
-                    margin={"l": 20, "r": 20, "t": 50, "b": 30},
-                    plot_bgcolor="white",
-                    paper_bgcolor="white",
-                    font={"family": "Inter", "size": 12},
-                )
-                fig_pred.update_xaxes(showgrid=True, gridcolor="#f1f5f9")
-                fig_pred.update_yaxes(showgrid=True, gridcolor="#f1f5f9")
-                st.plotly_chart(fig_pred, use_container_width=True)
-
-            with st.expander("🧪 Interactive What-If Medication Regimen Simulator", expanded=False):
-                st.write(
-                    f"Simulate potential biomarker trajectories for **{target_pred_param}** under alternate scenarios:"
-                )
-                sim_col1, sim_col2 = st.columns(2)
-                with sim_col1:
-                    sim_action = st.radio(
-                        "Select Regimen Scenario to Simulate:",
-                        [
-                            "Scenario A: Continue Current Therapy (Maintenance)",
-                            "Scenario B: Revert to Previous Medicine (De-escalation)",
-                            "Scenario C: Regimen Intensification (Add SGLT2i / Second Agent)",
-                        ],
-                        index=0,
-                    )
-                with sim_col2:
-                    if "Scenario A" in sim_action:
-                        st.success(
-                            f"**Projected 90-day {target_pred_param}:** `{f_90:.1f} {unit}`\n\n"
-                            "Maintains observed downward trajectory towards target."
-                        )
-                    elif "Scenario B" in sim_action:
-                        rebound_val = curr_v + (abs(curr_v - f_90) * 0.8)
-                        st.warning(
-                            f"**Projected 90-day {target_pred_param} (Rebound):** `{rebound_val:.1f} {unit}`\n\n"
-                            "Risk of glycemic / clinical rebound due to withdrawal of second agent."
-                        )
-                    else:
-                        intense_val = max(p_metric_info.get("normal_min", 4.0), f_90 * 0.92)
-                        st.info(
-                            f"**Projected 90-day {target_pred_param} (Intensified):** `{intense_val:.1f} {unit}`\n\n"
-                            "Accelerated normalization; monitor renal markers and hypoglycemia risk."
-                        )
         else:
-            st.info("Insufficient laboratory records to compute trajectory forecast for this parameter.")
+            st.info(
+                "ℹ️ No post-medication symptoms reported yet. If the patient has taken medication "
+                "and experienced an issue, record it in Tab 2 to view ADR causality."
+            )
 
         st.divider()
 
-        # Section 5: Export Power BI Datasets (CSV) - Prescription data ISOLATED in exports; Report Analysis = lab reports ONLY
-        st.markdown("### 5 · Export Clean Datasets for Power BI Desktop")
-        st.markdown(
-            "All visual analytics above are live inside the application. Click below to export "
-            "structured relational CSV datasets to load into Microsoft Power BI Desktop for offline modeling."
+        # SECTION 4: Export Unified Clinical JSON
+        st.markdown("### 💾 5. Export Unified Clinical Intelligence Record")
+        st.caption(
+            "Export structured record combining digitized prescription, patient profile, and post-medication ADR analysis for EHR integration."
         )
 
-        col_exp_btn, col_dl_pbi, col_dl_json = st.columns([1, 1, 1.2])
-        with col_exp_btn:
-            if st.button("📤 Export Relational CSVs to Disk (outputs/exports/)", type="primary", use_container_width=True):
-                with st.spinner("Generating clean Power BI relational datasets..."):
-                    exported_paths = orchestrator.export_longitudinal_powerbi_datasets(
-                        patient_info=current_patient,
-                        comparison_records=comparison_data,
-                        prescriptions=[],
-                        lab_reports=lab_reports,
-                    )
-                st.success("✅ Power BI CSV datasets successfully written to `outputs/exports/`!")
-                st.toast("Power BI relational datasets exported!")
-                for name, pth in exported_paths.items():
-                    if os.path.exists(pth):
-                        st.caption(f"📄 **{name.replace('_', ' ').title()}**: `{pth}` ({os.path.getsize(pth)} bytes)")
+        complete_clinical_record = {
+            "patient_profile": {
+                "id": selected_pid,
+                "name": current_patient.get("name"),
+                "age": current_patient.get("age"),
+                "gender": current_patient.get("gender"),
+                "allergies": current_patient.get("known_allergies", []),
+                "conditions": current_patient.get("known_conditions", []),
+            },
+            "prescription_extraction": rx_res_dash,
+            "post_medication_adr_analysis": post_res_dash,
+            "overall_safety_alert": overall_level,
+            "timestamp": datetime.now().isoformat(),
+        }
 
-        with col_dl_pbi:
-            if comparison_data:
-                df_dl_comp = pd.DataFrame(comparison_data)
-                csv_comp_bytes = df_dl_comp.to_csv(index=False).encode("utf-8")
-                st.download_button(
-                    "⬇️ Download Medication Impact CSV",
-                    data=csv_comp_bytes,
-                    file_name=f"medication_impact_{selected_pid}.csv",
-                    mime="text/csv",
-                    use_container_width=True,
-                )
-
-        with col_dl_json:
-            unified_json = orchestrator.generate_unified_clinical_json(
-                patient_info=current_patient,
-                comparison_records=comparison_data,
-                prescriptions=[],
-                lab_reports=lab_reports,
-            )
-            st.download_button(
-                "⬇️ Download Unified Clinical JSON",
-                data=json.dumps(unified_json, indent=2),
-                file_name=f"clinical_intelligence_{selected_pid}_{datetime.now().strftime('%Y%m%d')}.json",
-                mime="application/json",
-                use_container_width=True,
-            )
+        st.download_button(
+            "⬇️ Download Complete Clinical Intelligence JSON",
+            data=json.dumps(complete_clinical_record, indent=2),
+            file_name=f"clinical_intelligence_{selected_pid}_{datetime.now().strftime('%Y%m%d%H%M')}.json",
+            mime="application/json",
+            use_container_width=True,
+        )

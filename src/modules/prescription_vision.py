@@ -49,6 +49,82 @@ class PrescriptionVisionExtractor:
         "gemini-flash-lite-latest",
     ]
 
+    # ── Brand name → active chemical compound mapping ──
+    # Used to normalize drug brand names to their pharmacologically active
+    # ingredients (Stage 2 requirement: "Augmentin" -> "Amoxicillin + Clavulanic Acid")
+    BRAND_TO_ACTIVE_COMPOUND: dict[str, str] = {
+        "augmentin": "Amoxicillin + Clavulanic Acid",
+        "amoxiclav": "Amoxicillin + Clavulanic Acid",
+        "dolo": "Paracetamol",
+        "paracetamol": "Paracetamol",
+        "acetaminophen": "Paracetamol",
+        "crocin": "Paracetamol",
+        "calpol": "Paracetamol",
+        "allegra": "Fexofenadine",
+        "fexofenadine": "Fexofenadine",
+        "benadryl": "Diphenhydramine",
+        "diphenhydramine": "Diphenhydramine",
+        "sizodon": "Risperidone + Trihexyphenidyl",
+        "risperidone": "Risperidone",
+        "qutipin": "Quetiapine",
+        "quetiapine": "Quetiapine",
+        "ativan": "Lorazepam",
+        "lorazepam": "Lorazepam",
+        "rivotril": "Clonazepam",
+        "clonazepam": "Clonazepam",
+        "serta": "Sertraline",
+        "sertraline": "Sertraline",
+        "oprox": "Cefpodoxime + Clavulanic Acid",
+        "oprocv": "Cefpodoxime + Clavulanic Acid",
+        "cefpodoxime": "Cefpodoxime",
+        "altinose": "Aceclofenac + Paracetamol + Serratiopeptidase",
+        "aceclofenac": "Aceclofenac",
+        "breezy": "Levocetirizine + Montelukast",
+        "levocetirizine": "Levocetirizine",
+        "montelukast": "Montelukast",
+        "chipen": "Pantoprazole + Domperidone",
+        "pantoprazole": "Pantoprazole",
+        "domperidone": "Domperidone",
+        "amoxicillin": "Amoxicillin",
+        "pantop": "Pantoprazole",
+        "pantocid": "Pantoprazole",
+        "omez": "Omeprazole",
+        "omeprazole": "Omeprazole",
+        "metformin": "Metformin",
+        "glycomet": "Metformin",
+        "glucophage": "Metformin",
+        "atorvastatin": "Atorvastatin",
+        "lipvas": "Atorvastatin",
+        "atorva": "Atorvastatin",
+        "telmisartan": "Telmisartan",
+        "telma": "Telmisartan",
+        "amlodipine": "Amlodipine",
+        "amlodac": "Amlodipine",
+        "aspirin": "Aspirin",
+        "ecosprin": "Aspirin",
+        "clopidogrel": "Clopidogrel",
+        "clopivas": "Clopidogrel",
+        "warfarin": "Warfarin",
+        "salbutamol": "Salbutamol",
+        "albuterol": "Salbutamol",
+        "asthalin": "Salbutamol",
+        "cetirizine": "Cetirizine",
+        "zyrtec": "Cetirizine",
+        "ibuprofen": "Ibuprofen",
+        "brufen": "Ibuprofen",
+        "diclofenac": "Diclofenac",
+        "voveran": "Diclofenac",
+    }
+
+    # Certainty label → numeric confidence score (0.0 - 1.0)
+    CONFIDENCE_MAP: dict[str, float] = {
+        "high": 0.92,
+        "medium": 0.65,
+        "uncertain": 0.35,
+        "verify": 0.35,
+        "low": 0.30,
+    }
+
     # Pre-calibrated high-accuracy ground truth for standard reference clinical samples
     # to guarantee instantaneous, deterministic evaluation during live clinical presentations
     KNOWN_SAMPLE_RECORDS: dict[str, dict[str, Any]] = {
@@ -434,4 +510,117 @@ DO NOT HALLUCINATE MEDICATIONS. If a field cannot be read with confidence, mark 
             "status": "error",
             "error": "Gemini Vision models are currently experiencing high server demand. Please try again in a few moments.",
             "medicines": [],
+        }
+
+    # ============================================================
+    # STAGE 2 ADAPTER — returns the strict Stage 2 schema
+    # ============================================================
+
+    def _extract_active_compound(self, medicine_name: str) -> str:
+        """
+        Normalize a brand name (or brand+generic string) to its active
+        chemical compound. Strategy:
+          1. If medicine_name contains "(...)", use the parenthetical content.
+          2. Otherwise, look up the first matching brand token in
+             BRAND_TO_ACTIVE_COMPOUND.
+          3. Fallback: return the medicine_name as-is (unknown compound).
+        """
+        if not medicine_name:
+            return "Unknown"
+
+        name = medicine_name.strip()
+
+        # 1. Parenthetical active compound (e.g. "Augmentin 625mg (Amoxicillin + Clavulanate)")
+        paren_match = re.search(r"\(([^)]+)\)", name)
+        if paren_match:
+            compound = paren_match.group(1).strip()
+            # Normalize "Amoxicillin + Clavulanate" -> keep as is
+            return compound
+
+        # 2. Brand lookup (match the longest brand token)
+        name_lower = name.lower()
+        best_match = ""
+        for brand in self.BRAND_TO_ACTIVE_COMPOUND:
+            if brand in name_lower and len(brand) > len(best_match):
+                best_match = brand
+        if best_match:
+            return self.BRAND_TO_ACTIVE_COMPOUND[best_match]
+
+        # 3. Fallback
+        return name
+
+    def _confidence_to_score(self, certainty: str | None) -> float:
+        """Map a certainty label to a numeric 0.0 - 1.0 confidence score."""
+        if not certainty:
+            return 0.5
+        label = str(certainty).strip().lower()
+        for key, score in self.CONFIDENCE_MAP.items():
+            if key in label:
+                return score
+        return 0.5
+
+    def extract_stage2(self, image: Image.Image) -> dict[str, Any]:
+        """
+        Stage 2: Handwritten OCR & Text Extraction Agent.
+
+        Runs the Gemini Vision extraction and normalizes the output to the
+        strict Stage 2 schema:
+
+        {
+          "patient_details": {"name": str | None, "age": number | None, "gender": str | None},
+          "diagnosis_and_notes": str,
+          "prescribed_medications": [
+            {
+              "extracted_raw_text": str,
+              "active_chemical_compound": str,
+              "dosage": str,
+              "frequency": str,
+              "duration": str,
+              "confidence_score": float (0.0 - 1.0)
+            }
+          ]
+        }
+        """
+        raw = self.extract(image)
+
+        if raw.get("status") == "error" or not raw.get("medicines"):
+            return {
+                "patient_details": {"name": None, "age": None, "gender": None},
+                "diagnosis_and_notes": raw.get("error", "Extraction failed or no medications detected."),
+                "prescribed_medications": [],
+            }
+
+        # ── Patient details ──
+        age_raw = raw.get("patient_age")
+        try:
+            age_val = int(float(str(age_raw).strip())) if age_raw and str(age_raw).strip() not in ("", "null", "None") else None
+        except (ValueError, TypeError):
+            age_val = None
+
+        patient_details = {
+            "name": raw.get("patient_name") or None,
+            "age": age_val,
+            "gender": raw.get("patient_gender") or None,
+        }
+
+        # ── Diagnosis & notes ──
+        diag_parts = [p for p in [raw.get("diagnosed_condition"), raw.get("clinical_notes")] if p]
+        diagnosis_and_notes = "; ".join(diag_parts) if diag_parts else "No diagnosis or notes extracted."
+
+        # ── Prescribed medications (normalized) ──
+        prescribed = []
+        for med in raw.get("medicines", []):
+            prescribed.append({
+                "extracted_raw_text": med.get("raw_text", med.get("medicine_name", "")),
+                "active_chemical_compound": self._extract_active_compound(med.get("medicine_name", "")),
+                "dosage": med.get("dosage", "") or "Not specified",
+                "frequency": med.get("frequency", "") or "Not specified",
+                "duration": med.get("duration", "") or "Not specified",
+                "confidence_score": self._confidence_to_score(med.get("certainty")),
+            })
+
+        return {
+            "patient_details": patient_details,
+            "diagnosis_and_notes": diagnosis_and_notes,
+            "prescribed_medications": prescribed,
         }
