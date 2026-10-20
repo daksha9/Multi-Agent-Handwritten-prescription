@@ -122,6 +122,14 @@ class MedicationImpactAnalyzer:
     def __init__(self):
         pass
 
+    def compare_medication_impact(
+        self, lab_reports: list[dict[str, Any]], medication_timeline: list[dict[str, Any]] | None = None
+    ) -> list[dict[str, Any]]:
+        """
+        Alias for compute_parameter_comparison_table for compatibility with clinical dashboards.
+        """
+        return self.compute_parameter_comparison_table(lab_reports, medication_timeline)
+
     def compute_parameter_comparison_table(
         self, lab_reports: list[dict[str, Any]], medication_timeline: list[dict[str, Any]] | None = None
     ) -> list[dict[str, Any]]:

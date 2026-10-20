@@ -506,16 +506,16 @@ with st.sidebar:
 st.markdown(
     """
 <div class="hero-banner">
-    <div class="hero-title">🏥 Agentic Healthcare Assistant: Handwritten Prescription, Voice Assistant & Clinical Analytics</div>
+    <div class="hero-title">🏥 Agentic Healthcare Assistant: Handwritten Prescription, Clinical Analytics</div>
     <div class="hero-sub">
         Multimodal Gemini Vision AI Handwritten Prescription Extraction &nbsp;·&nbsp;
-        On-The-Spot Voice Assistant &nbsp;·&nbsp; Post-Medication Patient Voice & Text Feedback &nbsp;·&nbsp;
+        Post-Medication Patient Text Feedback &nbsp;·&nbsp;
         Doctor's Clinical Analysis & ADR Safety Dashboard
     </div>
     <div class="hero-pills">
         <span class="hero-pill">👁️ Multimodal Gemini Vision AI</span>
-        <span class="hero-pill">🎙️ On-The-Spot Voice Assistant</span>
-        <span class="hero-pill">💬 Post-Medication Voice & Text Input</span>
+        <span class="hero-pill">🎙️ On-The-Spot Assistant</span>
+        <span class="hero-pill">💬 Post-Medication Text Input</span>
         <span class="hero-pill">🛡️ Pharmacological Safety & Allergy Matrix</span>
         <span class="hero-pill">🩺 Doctor Clinical Decision Support</span>
     </div>
@@ -527,7 +527,7 @@ st.markdown(
 
 tab1, tab2, tab3 = st.tabs(
     [
-        "📝 Handwritten Prescription & Voice Assistant",
+        "📝 Handwritten Prescription Assistant",
         "💬 Patient Post-Medication Feedback",
         "🩺 Doctor Clinical Analysis Dashboard",
     ]
@@ -597,7 +597,6 @@ with tab1:
                 st.session_state["active_rx_path"] = str(p_samples_dir / "rx_01.jpeg")
                 st.session_state["rx_extraction_result"] = None
 
-    
     active_rx_source = uploaded_rx or st.session_state.get("active_rx_path")
 
     if active_rx_source is not None:
@@ -621,18 +620,10 @@ with tab1:
                 pipeline_status.append("🟢 Stage 1 & 2 (Vision): Gemini Online")
             else:
                 pipeline_status.append("🟡 Stage 1 & 2 (Vision): Using ground-truth calibration")
-            if orchestrator.voice_agent.is_available:
-                pipeline_status.append("🟢 Stage 3 (Voice): Speech Intelligence Online")
-            else:
-                pipeline_status.append("⚪ Stage 3 (Voice): Audio Agent Ready")
-            pipeline_status.append("🟢 Stage 4 (Safety): Clinical Reasoning Engine Ready")
+            pipeline_status.append("🟢 Stage 3 (Safety): Clinical Reasoning Engine Ready")
             for ps in pipeline_status:
                 st.markdown(f"<div style='font-size:0.85rem; margin:2px 0;'>{ps}</div>", unsafe_allow_html=True)
 
-            st.info(
-                "💡 **Pipeline:** Image → CLAHE Preprocessing → Gemini Vision OCR → "
-                "Voice Audio Transcription → Clinical Safety Reasoning (Drug-Allergy / DDI / Side-Effect checks)."
-            )
 
             run_extract = st.button(
                 "🚀 Run 4-Stage Agent Pipeline", type="primary", use_container_width=True
@@ -641,15 +632,13 @@ with tab1:
                 progress_bar = st.progress(0, text="Initializing 4-Stage Agent Pipeline...")
                 time.sleep(0.15)
 
-                progress_bar.progress(15, text="🔍 Stage 1/4: CLAHE contrast enhancement, binarization & de-skew...")
+                progress_bar.progress(15, text="🔍 Stage 1/3: CLAHE contrast enhancement, binarization & de-skew...")
                 time.sleep(0.2)
-                progress_bar.progress(35, text="🧠 Stage 2/4: Gemini Vision deciphering handwritten prescription...")
+                progress_bar.progress(35, text="🧠 Stage 2/3: Gemini Vision deciphering handwritten prescription...")
 
                 pipeline_result = orchestrator.run_4stage_pipeline(rx_image)
 
-                progress_bar.progress(70, text="🗣️ Stage 3/4: Patient voice history transcription & NER...")
-                time.sleep(0.15)
-                progress_bar.progress(90, text="🛡️ Stage 4/4: Clinical safety reasoning (allergy/DDI/side-effect)...")
+                progress_bar.progress(90, text="🛡️ Stage 3/3: Clinical safety reasoning (allergy/DDI/side-effect)...")
                 time.sleep(0.15)
                 progress_bar.progress(100, text="✅ Pipeline complete — generating Doctor Dashboard...")
                 time.sleep(0.2)
@@ -774,13 +763,6 @@ with tab1:
             _voice_hist = _stage3.get("patient_reported_history", {}) or {}
 
             st.divider()
-            st.markdown("### 🗣️ Stage 3: Patient Voice History (Gemini Audio NER)")
-            _transcript = _stage3.get("raw_transcript", "")
-            if _transcript:
-                with st.expander("📝 View Full Patient Transcript", expanded=False):
-                    st.markdown(f'> {_transcript}')
-            else:
-                st.caption("No audio was provided — voice history skipped.")
 
             _vcol1, _vcol2 = st.columns(2)
             with _vcol1:
@@ -876,7 +858,7 @@ with tab1:
                 st.caption(f"⚠️ {_disclaimer}")
 
         # Patient Profile Synchronization Card (Linking Tab 1 to Tab 2)
-        st.markdown("#### 🔄 Update Patient Information from Prescription (Link to Reports Comparision)")
+        st.markdown("#### 🔄 Update Patient Information from Prescription")
         st.caption(
             "Review and synchronize patient information extracted from this handwritten prescription. "
             "Values are automatically deduplicated so existing conditions and medications are not repeated, "
@@ -1079,7 +1061,49 @@ with tab2:
     else:
         st.info("💡 Tip: Upload or process a prescription in Tab 1 first to cross-reference your specific prescribed medications.")
 
-    st.markdown("### ✍️ Patient Symptoms & Reaction Description")
+    st.markdown("### 🎙️ Option A: Speak Post-Medication Symptoms (Voice Input)")
+    st.caption("Click the microphone below to describe any symptoms, reactions, or discomfort orally on the spot:")
+    post_med_mic_audio = st.audio_input(
+        "Speak your post-medication symptoms / issues:",
+        key="tab2_post_med_mic_input",
+        help="Click the microphone to start recording your voice, speak your issue, and click stop.",
+    )
+
+    audio_post_bytes = None
+    if post_med_mic_audio:
+        st.audio(post_med_mic_audio)
+        if hasattr(post_med_mic_audio, "getbuffer"):
+            audio_post_bytes = bytes(post_med_mic_audio.getbuffer())
+        elif hasattr(post_med_mic_audio, "read"):
+            audio_post_bytes = post_med_mic_audio.read()
+
+        if audio_post_bytes:
+            audio_sig = f"{len(audio_post_bytes)}_{audio_post_bytes[:32]}"
+            if st.session_state.get("last_transcribed_post_audio_sig") != audio_sig:
+                with st.spinner("🤖 Transcribing spoken symptoms using Groq Whisper..."):
+                    transcript = orchestrator.voice_agent.transcribe_audio_bytes(audio_post_bytes)
+                    st.session_state["tab2_voice_transcript"] = transcript
+                    st.session_state["last_transcribed_post_audio_sig"] = audio_sig
+                    if transcript and not st.session_state.get("post_med_text_input"):
+                        st.session_state["post_med_text_input"] = transcript
+
+    tab2_transcript = st.session_state.get("tab2_voice_transcript", "")
+    if tab2_transcript:
+        st.markdown(
+            f"""
+            <div style="background: #f0fdf4; border: 1px solid #86efac; border-left: 5px solid #22c55e; border-radius: 8px; padding: 12px 16px; margin: 10px 0 16px 0;">
+                <div style="font-weight: 700; color: #166534; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+                    <span>🎙️ Spoken Voice Command / Transcript:</span>
+                </div>
+                <div style="font-size: 1.05rem; color: #1e293b; margin-top: 6px; font-style: italic; line-height: 1.5;">
+                    "{tab2_transcript}"
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("### ✍️ Option B: Type / Review Symptoms & Reactions")
     st.caption("Type any symptoms, timing, or issues you noticed after taking your prescribed medication:")
 
     # Quick preset buttons for instant 1-click clinical testing
@@ -1127,9 +1151,11 @@ with tab2:
 
     if btn_analyze_post:
         text_input_val = typed_feedback.strip() if typed_feedback else ""
+        if not text_input_val and tab2_transcript:
+            text_input_val = tab2_transcript
 
-        if not text_input_val:
-            st.warning("⚠️ Please describe your symptoms or select a clinical preset above before submitting.")
+        if not text_input_val and not audio_post_bytes:
+            st.warning("⚠️ Please speak into the microphone or describe your symptoms above before submitting.")
         else:
             with st.spinner("🤖 Clinical AI Agent evaluating symptoms & adverse drug reactions..."):
                 meds_for_analysis = (
@@ -1139,7 +1165,7 @@ with tab2:
                 )
                 post_analysis = orchestrator.run_post_medication_analysis(
                     feedback_text=text_input_val,
-                    audio_bytes=None,
+                    audio_bytes=audio_post_bytes,
                     prescribed_medications=meds_for_analysis,
                     patient_allergies=current_patient.get("known_allergies", []),
                     patient_conditions=current_patient.get("known_conditions", []),
@@ -1156,9 +1182,21 @@ with tab2:
         st.markdown("### 📊 Immediate Patient Feedback Summary")
         _al = curr_analysis.get("alert_level", "GREEN")
         _badge_col = "#dc2626" if _al == "RED" else ("#f59e0b" if _al == "AMBER" else "#16a34a")
+
+        spoken_txt = curr_analysis.get("spoken_transcript") or tab2_transcript
+        transcription_box_html = ""
+        if spoken_txt:
+            transcription_box_html = (
+                f'<div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 14px; margin: 8px 0 12px 0;">'
+                f'<span style="font-weight: 600; color: #1e40af; font-size: 0.9rem;">🎙️ Audio Transcribed Text:</span> '
+                f'<span style="color: #1e293b; font-style: italic;">"{spoken_txt}"</span>'
+                f'</div>'
+            )
+
         st.markdown(
             f'<div style="border-left: 6px solid {_badge_col}; background: #f8fafc; padding: 14px 18px; border-radius: 8px; margin: 12px 0;">'
             f'<div style="font-weight: 700; color: {_badge_col}; font-size: 1.1rem;">Clinical Assessment: {curr_analysis.get("causality_assessment")}</div>'
+            f'{transcription_box_html}'
             f'<div style="font-size: 0.92rem; color: #334155; margin-top: 6px;"><b>Suspected Drug:</b> {curr_analysis.get("suspected_medication")}</div>'
             f'<div style="font-size: 0.92rem; color: #475569; margin-top: 4px;"><b>Reported Symptoms:</b> {", ".join(curr_analysis.get("reported_symptoms", []))}</div>'
             f'<div style="font-size: 0.92rem; color: #0284c7; margin-top: 8px;">👉 <b>Full details, physician recommendations, and emergency warnings are displayed in the 🩺 Doctor Clinical Analysis Dashboard tab.</b></div>'
@@ -1474,3 +1512,68 @@ with tab3:
             mime="application/json",
             use_container_width=True,
         )
+
+        st.divider()
+
+        # SECTION 6: Microsoft Power BI Healthcare Analytics Export
+        st.markdown("### 📊 6. Microsoft Power BI Healthcare Analytics Export")
+        st.markdown(
+            "Export enterprise relational data models directly into Microsoft Power BI-ready CSV files. "
+            "The tables adhere to the **Kimball Star-Schema** architecture (`Dim_Patient`, `Dim_Medications`, `Fact_LabResults`, `Fact_Prescriptions`, `Fact_ADR_Causality`), "
+            "allowing instant drag-and-drop clinical business intelligence, parameter trend visualization, and hospital risk tracking."
+        )
+
+        col_pbi1, col_pbi2 = st.columns([1, 1])
+        with col_pbi1:
+            st.markdown("#### 🌟 Star-Schema Relational Architecture")
+            st.markdown(
+                """
+                - **`Dim_Patient.csv`**: Patient demographics, documented allergies, chronic conditions, and safety measures.
+                - **`prescriptions_telemetry.csv`**: Digitized medications, dosage, frequency, duration, certainty score, and clinic pad info.
+                - **`medication_impact_comparison.csv`**: Before/after biomarker transitions, absolute delta, percentage changes, and efficiency status.
+                - **`biomarkers_telemetry.csv`**: Longitudinal lab values, test dates, standard units, and clinical reference intervals.
+                - **`clinical_kpi_telemetry.csv`**: Operational triage alerts, ADR counts, pipeline latencies, and patient safety metrics.
+                """
+            )
+
+        with col_pbi2:
+            st.markdown("#### 🚀 Generate Datasets for Power BI")
+            st.caption("Writes structured CSV tables into `outputs/exports/` for direct Power BI desktop ingestion.")
+            if st.button("📊 Export All Tables for Power BI", type="secondary", use_container_width=True):
+                all_rx_list = current_patient.get("prescriptions", [])
+                if rx_res_dash and rx_res_dash.get("status") == "success":
+                    all_rx_list = [rx_res_dash] + all_rx_list
+
+                all_labs = current_patient.get("lab_reports", [])
+                comp_records = impact_analyzer.compare_medication_impact(all_labs)
+
+                paths = orchestrator.export_longitudinal_powerbi_datasets(
+                    patient_info=current_patient,
+                    comparison_records=comp_records,
+                    prescriptions=all_rx_list,
+                    lab_reports=all_labs,
+                )
+                st.session_state["pbi_export_paths"] = paths
+                st.success("✅ Power BI datasets successfully generated in `outputs/exports/`!")
+
+            pbi_paths = st.session_state.get("pbi_export_paths")
+            if pbi_paths:
+                st.markdown("**Generated Relational CSV Tables:**")
+                for tbl_name, file_p in pbi_paths.items():
+                    if Path(file_p).exists():
+                        csv_data = Path(file_p).read_bytes()
+                        st.download_button(
+                            f"⬇️ Download {Path(file_p).name}",
+                            data=csv_data,
+                            file_name=Path(file_p).name,
+                            mime="text/csv",
+                            key=f"dl_pbi_{tbl_name}",
+                            use_container_width=True,
+                        )
+
+            st.markdown(
+                '<div style="font-size: 0.85rem; color: #64748b; margin-top: 10px; background: #f8fafc; padding: 8px 12px; border-radius: 6px;">'
+                '💡 <b>Power BI Ingestion:</b> Open Power BI Desktop &rarr; Click <b>Get Data &rarr; Folder</b> (or CSV) &rarr; Select <code>med_agent/outputs/exports</code> &rarr; Load.'
+                '</div>',
+                unsafe_allow_html=True,
+            )
