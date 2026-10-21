@@ -1,0 +1,31 @@
+case_id,prescribed_medicines,patient_allergies,patient_conditions,active_medications,expected_action,clinical_rationale
+case_001,Aspirin 75mg; Clopidogrel 75mg,None,None,None,review,Dual antiplatelet therapy elevates major gastrointestinal and systemic bleeding risk
+case_002,Cefixime 200mg,Penicillin,None,None,review,Cephalosporin beta-lactam cross-reactivity in patient with reported penicillin allergy
+case_003,Amoxicillin 500mg,Penicillin,None,None,review,Direct penicillin class hypersensitivity and severe anaphylaxis risk
+case_004,Augmentin 625mg,Penicillin,None,None,review,Direct amoxicillin-clavulanate hypersensitivity alert
+case_005,Aspirin 100mg,None,None,Warfarin 5mg,review,Concomitant antiplatelet and anticoagulant markedly increases severe hemorrhagic risk
+case_006,Metformin 500mg,None,Chronic Kidney Disease,None,review,Metformin contraindicated in chronic renal impairment due to fatal lactic acidosis risk
+case_007,Ibuprofen 400mg,None,Peptic Ulcer Disease,None,review,NSAID gastrointestinal mucosal erosion and acute ulcer perforation risk
+case_008,Naproxen 500mg,None,Severe Renal Impairment,None,review,NSAID-induced renal prostaglandin inhibition and acute kidney injury risk
+case_009,Atorvastatin 40mg,None,Active Hepatic Cirrhosis,None,review,Statin hepatotoxicity contraindicated in decompensated liver disease
+case_010,Salbutamol 4mg,None,Cardiac Arrhythmia,None,review,Beta-2 agonist chronotropic stimulation risking tachyarrhythmia exacerbation
+case_011,Simvastatin 40mg,None,None,Amiodarone 200mg,review,Amiodarone CYP3A4 inhibition elevates simvastatin levels risking rhabdomyolysis
+case_012,Ciprofloxacin 500mg,None,None,Theophylline 300mg,review,Ciprofloxacin inhibits theophylline clearance risking theophylline toxicity
+case_013,Lisinopril 20mg,None,None,Spironolactone 50mg,review,Dual renin-angiotensin-aldosterone blockade markedly elevates hyperkalemia risk
+case_014,Fluconazole 150mg,None,None,Warfarin 5mg,review,Fluconazole inhibits CYP2C9 metabolism of warfarin precipitating major bleeding
+case_015,Sertraline 50mg,None,None,Tramadol 50mg,review,Concurrent serotonergic agents increase risk of life-threatening Serotonin Syndrome
+case_016,Ibuprofen 400mg,None,None,Methotrexate 15mg,review,NSAID reduces renal clearance of methotrexate leading to bone marrow toxicity
+case_017,Simvastatin 20mg,None,None,Clarithromycin 500mg,review,Macrolide CYP3A4 inhibition elevates simvastatin levels risking acute rhabdomyolysis
+case_018,Sulfamethoxazole 800mg,Sulfa,None,None,review,Direct sulfonamide hypersensitivity in documented sulfa allergy
+case_019,Paracetamol 500mg,None,None,None,no_rule_triggered,Standard safe analgesic regimen with no documented contraindications
+case_020,Cetirizine 10mg,None,Allergic Rhinitis,None,no_rule_triggered,Standard non-sedating antihistamine appropriate for allergic rhinitis
+case_021,Omeprazole 20mg,None,GERD,None,no_rule_triggered,Standard proton pump inhibitor indicated for gastroesophageal reflux
+case_022,Amlodipine 5mg,None,Essential Hypertension,None,no_rule_triggered,Standard dihydropyridine calcium channel blocker for blood pressure control
+case_023,Losartan 50mg,None,Essential Hypertension,None,no_rule_triggered,Standard angiotensin receptor blocker appropriate for hypertension
+case_024,Loratadine 10mg,Penicillin,Seasonal Allergies,None,no_rule_triggered,Non-cross-reactive antihistamine safe in penicillin allergy
+case_025,Paracetamol 650mg,Penicillin,Tension Headache,None,no_rule_triggered,Safe antipyretic/analgesic with zero beta-lactam cross-reactivity
+case_026,Pantoprazole 40mg,None,Gastritis,None,no_rule_triggered,Standard proton pump inhibitor appropriate for gastritis
+case_027,Metformin 500mg,None,Type 2 Diabetes Mellitus,None,no_rule_triggered,First-line biguanide in diabetic patient with preserved renal function
+case_028,Atorvastatin 10mg,None,Hypercholesterolemia,None,no_rule_triggered,Standard lipid-lowering therapy with normal hepatic baseline
+case_029,Azithromycin 500mg,Penicillin,Acute Bronchitis,None,no_rule_triggered,Macrolide antibiotic is safe alternative in penicillin allergy
+case_030,Budesonide 200mcg,None,Bronchial Asthma,None,no_rule_triggered,Inhaled corticosteroid safe for maintenance asthma control

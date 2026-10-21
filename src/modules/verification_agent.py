@@ -39,8 +39,19 @@ class PrescriptionVerificationAgent:
 
         # Allergy cross-sensitivity mapping
         self.allergy_families = {
-            "penicillin": ["amoxicillin", "ampicillin", "augmentin", "piperacillin", "penicillin v", "oxacillin"],
-            "cephalosporin": ["cephalexin", "ceftriaxone", "cefuroxime", "cefixime", "cefepime"],
+            "penicillin": [
+                "amoxicillin",
+                "ampicillin",
+                "augmentin",
+                "piperacillin",
+                "penicillin v",
+                "oxacillin",
+                "cefixime",
+                "cephalexin",
+                "ceftriaxone",
+                "cefuroxime",
+            ],
+            "cephalosporin": ["cephalexin", "ceftriaxone", "cefuroxime", "cefixime", "cefepime", "amoxicillin"],
             "sulfa": ["sulfamethoxazole", "bactrim", "septra", "sulfasalazine"],
             "nsaid": ["aspirin", "ibuprofen", "naproxen", "diclofenac", "ketorolac", "celecoxib", "meloxicam"],
             "statin": ["atorvastatin", "simvastatin", "rosuvastatin", "pravastatin"],
@@ -63,6 +74,16 @@ class PrescriptionVerificationAgent:
                 "warning": "NSAIDs can cause acute kidney injury, fluid retention, and GI mucosal ulceration.",
                 "severity": "CRITICAL",
             },
+            "naproxen": {
+                "conditions": ["chronic kidney disease", "ckd", "renal impairment", "peptic ulcer"],
+                "warning": "NSAIDs impair renal prostaglandins and aggravate preexisting renal impairment or ulceration.",
+                "severity": "CRITICAL",
+            },
+            "doxycycline": {
+                "conditions": ["pregnancy", "pregnant", "lactation"],
+                "warning": "Tetracyclines are contraindicated in pregnancy due to risk of fetal tooth discoloration and skeletal impairment.",
+                "severity": "CRITICAL",
+            },
             "atorvastatin": {
                 "conditions": ["liver disease", "hepatic impairment", "cirrhosis"],
                 "warning": "Statins can elevate transaminases and are contraindicated in active liver disease.",
@@ -79,6 +100,21 @@ class PrescriptionVerificationAgent:
                 "severity": "INFO",
             },
         }
+
+        # High-risk drug-drug interaction pairs
+        self.high_risk_interactions = [
+            ("aspirin", "clopidogrel", "Dual antiplatelet therapy significantly increases risk of major gastrointestinal and systemic bleeding.", "WARNING"),
+            ("clopidogrel", "aspirin", "Dual antiplatelet therapy significantly increases risk of major gastrointestinal and systemic bleeding.", "WARNING"),
+            ("aspirin", "warfarin", "Combined anticoagulant and antiplatelet therapy markedly increases severe hemorrhagic risk.", "CRITICAL"),
+            ("warfarin", "aspirin", "Combined anticoagulant and antiplatelet therapy markedly increases severe hemorrhagic risk.", "CRITICAL"),
+            ("simvastatin", "amiodarone", "Amiodarone inhibits CYP3A4, markedly increasing simvastatin concentration and rhabdomyolysis risk.", "CRITICAL"),
+            ("ciprofloxacin", "theophylline", "Ciprofloxacin inhibits theophylline clearance, risking life-threatening theophylline neurotoxicity.", "CRITICAL"),
+            ("lisinopril", "spironolactone", "Combined ACE inhibitor and potassium-sparing diuretic creates severe hyperkalemia risk.", "CRITICAL"),
+            ("fluconazole", "warfarin", "Fluconazole strongly inhibits CYP2C9, significantly increasing INR and life-threatening bleeding.", "CRITICAL"),
+            ("sertraline", "tramadol", "Concurrent serotonergic agents markedly increase the risk of Serotonin Syndrome.", "CRITICAL"),
+            ("methotrexate", "ibuprofen", "NSAIDs reduce renal tubular clearance of methotrexate, causing severe hematologic toxicity.", "CRITICAL"),
+            ("clarithromycin", "simvastatin", "Macrolide inhibition of CYP3A4 elevates simvastatin levels, precipitating severe myopathy.", "CRITICAL"),
+        ]
 
         # Initialize LLM clients
         self.groq_client = self._init_groq()
@@ -146,6 +182,7 @@ class PrescriptionVerificationAgent:
         patient_allergies: list[str] | None = None,
         patient_conditions: list[str] | None = None,
         active_medications: list[str] | None = None,
+        consult_llm: bool = True,
     ) -> dict[str, Any]:
         """
         Runs comprehensive clinical safety verification on the prescribed drugs.
@@ -172,7 +209,7 @@ class PrescriptionVerificationAgent:
 
         # 4. Optional: Enrich with LLM (Gemini / Groq) if connected
         llm_insights = None
-        if (self.gemini_client or self.groq_client) and clean_prescribed:
+        if consult_llm and (self.gemini_client or self.groq_client) and clean_prescribed:
             llm_insights = self._consult_llm(
                 clean_prescribed, patient_allergies, patient_conditions, active_medications, alerts
             )
@@ -255,6 +292,30 @@ class PrescriptionVerificationAgent:
         alerts = []
         all_drugs = list(dict.fromkeys(prescribed + active_meds))
 
+        # Check high-risk interactions matrix
+        seen_pairs = set()
+        for d1 in all_drugs:
+            d1_l = d1.lower()
+            for d2 in all_drugs:
+                if d1 == d2:
+                    continue
+                d2_l = d2.lower()
+                pair_key = tuple(sorted([d1_l, d2_l]))
+                if pair_key in seen_pairs:
+                    continue
+                for drug_a, drug_b, warning_msg, severity in self.high_risk_interactions:
+                    if (drug_a in d1_l and drug_b in d2_l) or (drug_b in d1_l and drug_a in d2_l):
+                        seen_pairs.add(pair_key)
+                        alerts.append(
+                            {
+                                "category": "Drug Interaction",
+                                "severity": severity,
+                                "drug": f"{d1} + {d2}",
+                                "trigger": f"High-Risk Drug Interaction: {drug_a.title()} + {drug_b.title()}",
+                                "message": warning_msg,
+                            }
+                        )
+
         # Check in reference_db
         if not self.reference_db.empty:
             for _i, d1 in enumerate(all_drugs):
@@ -270,17 +331,20 @@ class PrescriptionVerificationAgent:
                             continue
                         for d2 in all_drugs:
                             if d2.lower() != d1_lower and inter_clean in d2.lower():
-                                alerts.append(
-                                    {
-                                        "category": "Drug Interaction",
-                                        "severity": "CRITICAL"
-                                        if any(w in inter_clean for w in ["warfarin", "clopidogrel", "aspirin"])
-                                        else "WARNING",
-                                        "drug": f"{d1} + {d2}",
-                                        "trigger": f"Adverse Drug Interaction: {inter.strip()}",
-                                        "message": f"Co-administration of {d1} and {d2} may precipitate adverse synergistic or antagonistic toxicities.",
-                                    }
-                                )
+                                pair_key = tuple(sorted([d1_lower, d2.lower()]))
+                                if pair_key not in seen_pairs:
+                                    seen_pairs.add(pair_key)
+                                    alerts.append(
+                                        {
+                                            "category": "Drug Interaction",
+                                            "severity": "CRITICAL"
+                                            if any(w in inter_clean for w in ["warfarin", "clopidogrel", "aspirin"])
+                                            else "WARNING",
+                                            "drug": f"{d1} + {d2}",
+                                            "trigger": f"Adverse Drug Interaction: {inter.strip()}",
+                                            "message": f"Co-administration of {d1} and {d2} may precipitate adverse synergistic or antagonistic toxicities.",
+                                        }
+                                    )
         return alerts
 
     def _consult_llm(

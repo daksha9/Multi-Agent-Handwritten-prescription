@@ -1,0 +1,9 @@
+prescription_id,image_filename,expected_text,expected_medicines,expected_dose,expected_frequency,expected_duration,notes
+# TEMPLATE INSTRUCTIONS:
+# 1. Transcribe exactly what is legible from the de-identified prescription image.
+# 2. Do not guess unclear text: mark it as [unclear] and note the uncertainty in notes.
+# 3. Separate multiple expected_medicines with semicolons (e.g. amoxicillin; clavulanate).
+# 4. Fill dose, frequency, duration as written on the prescription pad, not an inferred regimen.
+# Example:
+# rx000,images/rx000.png,SYNTHETIC OCR SAMPLE | Rx | drug_name 500mg | 1-0-1 x 5d,drug_name,500mg,1-0-1,5 days,Example reference row
+

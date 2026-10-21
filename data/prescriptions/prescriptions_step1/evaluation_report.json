@@ -1,0 +1,1489 @@
+{
+  "metadata": {
+    "generated_at": "2026-10-21 19:51:40",
+    "labels_file": "labels.csv",
+    "predictions_file": "predictions.csv",
+    "timings_file": "timings.csv",
+    "total_labels": 50,
+    "total_predictions": 50,
+    "matched_cases": 50,
+    "unmatched_labels": [],
+    "unmatched_predictions": [],
+    "environment": {
+      "os": "Windows-10-10.0.26300-SP0",
+      "python_version": "3.11.9",
+      "processor": "Intel64 Family 6 Model 186 Stepping 3, GenuineIntel"
+    }
+  },
+  "aggregate_metrics": {
+    "mean_cer_percent": 3.2,
+    "mean_word_accuracy_percent": 96.46,
+    "exact_4_field_accuracy_percent": 94.0,
+    "individual_field_accuracies_percent": {
+      "medicines": 94.0,
+      "dose": 96.0,
+      "frequency": 96.0,
+      "duration": 96.0
+    },
+    "medicine_entity_metrics": {
+      "micro_precision_percent": 98.33,
+      "micro_recall_percent": 95.16,
+      "micro_f1_percent": 96.72,
+      "macro_precision_percent": 99.0,
+      "macro_recall_percent": 97.67,
+      "macro_f1_percent": 98.2
+    }
+  },
+  "timings_summary": {
+    "image_loading": {
+      "invocations": 50,
+      "mean_seconds": 0.0261,
+      "median_seconds": 0.0264,
+      "min_seconds": 0.0128,
+      "max_seconds": 0.0498,
+      "total_seconds": 1.3032
+    },
+    "preprocessing": {
+      "invocations": 50,
+      "mean_seconds": 0.6982,
+      "median_seconds": 0.6316,
+      "min_seconds": 0.5536,
+      "max_seconds": 1.2785,
+      "total_seconds": 34.9106
+    },
+    "ocr_recognition": {
+      "invocations": 50,
+      "mean_seconds": 1.0372,
+      "median_seconds": 1.03,
+      "min_seconds": 0.85,
+      "max_seconds": 1.24,
+      "total_seconds": 51.8602
+    },
+    "medicine_extraction": {
+      "invocations": 50,
+      "mean_seconds": 0.0574,
+      "median_seconds": 0.058,
+      "min_seconds": 0.05,
+      "max_seconds": 0.064,
+      "total_seconds": 2.871
+    },
+    "safety_screening": {
+      "invocations": 50,
+      "mean_seconds": 0.0013,
+      "median_seconds": 0.001,
+      "min_seconds": 0.0008,
+      "max_seconds": 0.0033,
+      "total_seconds": 0.0669
+    },
+    "total_end_to_end": {
+      "invocations": 50,
+      "mean_seconds": 1.8202,
+      "median_seconds": 1.7896,
+      "min_seconds": 1.5187,
+      "max_seconds": 2.5161,
+      "total_seconds": 91.0119
+    }
+  },
+  "per_case_results": [
+    {
+      "prescription_id": "rx001",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 189,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx001 Patient: DEMO-01 | Rx | acetaminophen TEST-DOSE-01 | TEST-FREQ-01 TEST-DURATION-01 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "acetaminophen",
+        "dose": "TEST-DOSE-01",
+        "frequency": "TEST-FREQ-01",
+        "duration": "TEST-DURATION-01"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx001 Patient: DEMO-01 | Rx | acetaminophen TEST-DOSE-01 | TEST-FREQ-01 TEST-DURATION-01 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "acetaminophen",
+        "dose": "TEST-DOSE-01",
+        "frequency": "TEST-FREQ-01",
+        "duration": "TEST-DURATION-01"
+      }
+    },
+    {
+      "prescription_id": "rx002",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 185,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx002 Patient: DEMO-02 | Rx | ibuprofen TEST-DOSE-02 | TEST-FREQ-02 TEST-DURATION-02 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "ibuprofen",
+        "dose": "TEST-DOSE-02",
+        "frequency": "TEST-FREQ-02",
+        "duration": "TEST-DURATION-02"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx002 Patient: DEMO-02 | Rx | ibuprofen TEST-DOSE-02 | TEST-FREQ-02 TEST-DURATION-02 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "ibuprofen",
+        "dose": "TEST-DOSE-02",
+        "frequency": "TEST-FREQ-02",
+        "duration": "TEST-DURATION-02"
+      }
+    },
+    {
+      "prescription_id": "rx003",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 184,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx003 Patient: DEMO-03 | Rx | naproxen TEST-DOSE-03 | TEST-FREQ-03 TEST-DURATION-03 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "naproxen",
+        "dose": "TEST-DOSE-03",
+        "frequency": "TEST-FREQ-03",
+        "duration": "TEST-DURATION-03"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx003 Patient: DEMO-03 | Rx | naproxen TEST-DOSE-03 | TEST-FREQ-03 TEST-DURATION-03 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "naproxen",
+        "dose": "TEST-DOSE-03",
+        "frequency": "TEST-FREQ-03",
+        "duration": "TEST-DURATION-03"
+      }
+    },
+    {
+      "prescription_id": "rx004",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 187,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx004 Patient: DEMO-04 | Rx | amoxicillin TEST-DOSE-04 | TEST-FREQ-04 TEST-DURATION-04 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "amoxicillin",
+        "dose": "TEST-DOSE-04",
+        "frequency": "TEST-FREQ-04",
+        "duration": "TEST-DURATION-04"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx004 Patient: DEMO-04 | Rx | amoxicillin TEST-DOSE-04 | TEST-FREQ-04 TEST-DURATION-04 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "amoxicillin",
+        "dose": "TEST-DOSE-04",
+        "frequency": "TEST-FREQ-04",
+        "duration": "TEST-DURATION-04"
+      }
+    },
+    {
+      "prescription_id": "rx005",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 188,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx005 Patient: DEMO-05 | Rx | azithromycin TEST-DOSE-05 | TEST-FREQ-05 TEST-DURATION-05 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "azithromycin",
+        "dose": "TEST-DOSE-05",
+        "frequency": "TEST-FREQ-05",
+        "duration": "TEST-DURATION-05"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx005 Patient: DEMO-05 | Rx | azithromycin TEST-DOSE-05 | TEST-FREQ-05 TEST-DURATION-05 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "azithromycin",
+        "dose": "TEST-DOSE-05",
+        "frequency": "TEST-FREQ-05",
+        "duration": "TEST-DURATION-05"
+      }
+    },
+    {
+      "prescription_id": "rx006",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx006 Patient: DEMO-06 | Rx | cephalexin TEST-DOSE-06 | TEST-FREQ-06 TEST-DURATION-06 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "cephalexin",
+        "dose": "TEST-DOSE-06",
+        "frequency": "TEST-FREQ-06",
+        "duration": "TEST-DURATION-06"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx006 Patient: DEMO-06 | Rx | cephalexin TEST-DOSE-06 | TEST-FREQ-06 TEST-DURATION-06 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "cephalexin",
+        "dose": "TEST-DOSE-06",
+        "frequency": "TEST-FREQ-06",
+        "duration": "TEST-DURATION-06"
+      }
+    },
+    {
+      "prescription_id": "rx007",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 184,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx007 Patient: DEMO-07 | Rx | cefixime TEST-DOSE-07 | TEST-FREQ-07 TEST-DURATION-07 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "cefixime",
+        "dose": "TEST-DOSE-07",
+        "frequency": "TEST-FREQ-07",
+        "duration": "TEST-DURATION-07"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx007 Patient: DEMO-07 | Rx | cefixime TEST-DOSE-07 | TEST-FREQ-07 TEST-DURATION-07 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "cefixime",
+        "dose": "TEST-DOSE-07",
+        "frequency": "TEST-FREQ-07",
+        "duration": "TEST-DURATION-07"
+      }
+    },
+    {
+      "prescription_id": "rx008",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 187,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx008 Patient: DEMO-08 | Rx | doxycycline TEST-DOSE-08 | TEST-FREQ-08 TEST-DURATION-08 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "doxycycline",
+        "dose": "TEST-DOSE-08",
+        "frequency": "TEST-FREQ-08",
+        "duration": "TEST-DURATION-08"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx008 Patient: DEMO-08 | Rx | doxycycline TEST-DOSE-08 | TEST-FREQ-08 TEST-DURATION-08 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "doxycycline",
+        "dose": "TEST-DOSE-08",
+        "frequency": "TEST-FREQ-08",
+        "duration": "TEST-DURATION-08"
+      }
+    },
+    {
+      "prescription_id": "rx009",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 185,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx009 Patient: DEMO-09 | Rx | metformin TEST-DOSE-09 | TEST-FREQ-09 TEST-DURATION-09 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "metformin",
+        "dose": "TEST-DOSE-09",
+        "frequency": "TEST-FREQ-09",
+        "duration": "TEST-DURATION-09"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx009 Patient: DEMO-09 | Rx | metformin TEST-DOSE-09 | TEST-FREQ-09 TEST-DURATION-09 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "metformin",
+        "dose": "TEST-DOSE-09",
+        "frequency": "TEST-FREQ-09",
+        "duration": "TEST-DURATION-09"
+      }
+    },
+    {
+      "prescription_id": "rx010",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx010 Patient: DEMO-10 | Rx | lisinopril TEST-DOSE-10 | TEST-FREQ-10 TEST-DURATION-10 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "lisinopril",
+        "dose": "TEST-DOSE-10",
+        "frequency": "TEST-FREQ-10",
+        "duration": "TEST-DURATION-10"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx010 Patient: DEMO-10 | Rx | lisinopril TEST-DOSE-10 | TEST-FREQ-10 TEST-DURATION-10 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "lisinopril",
+        "dose": "TEST-DOSE-10",
+        "frequency": "TEST-FREQ-10",
+        "duration": "TEST-DURATION-10"
+      }
+    },
+    {
+      "prescription_id": "rx011",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx011 Patient: DEMO-11 | Rx | amlodipine TEST-DOSE-11 | TEST-FREQ-11 TEST-DURATION-11 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "amlodipine",
+        "dose": "TEST-DOSE-11",
+        "frequency": "TEST-FREQ-11",
+        "duration": "TEST-DURATION-11"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx011 Patient: DEMO-11 | Rx | amlodipine TEST-DOSE-11 | TEST-FREQ-11 TEST-DURATION-11 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "amlodipine",
+        "dose": "TEST-DOSE-11",
+        "frequency": "TEST-FREQ-11",
+        "duration": "TEST-DURATION-11"
+      }
+    },
+    {
+      "prescription_id": "rx012",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 184,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx012 Patient: DEMO-12 | Rx | losartan TEST-DOSE-12 | TEST-FREQ-12 TEST-DURATION-12 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "losartan",
+        "dose": "TEST-DOSE-12",
+        "frequency": "TEST-FREQ-12",
+        "duration": "TEST-DURATION-12"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx012 Patient: DEMO-12 | Rx | losartan TEST-DOSE-12 | TEST-FREQ-12 TEST-DURATION-12 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "losartan",
+        "dose": "TEST-DOSE-12",
+        "frequency": "TEST-FREQ-12",
+        "duration": "TEST-DURATION-12"
+      }
+    },
+    {
+      "prescription_id": "rx013",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 188,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx013 Patient: DEMO-13 | Rx | atorvastatin TEST-DOSE-13 | TEST-FREQ-13 TEST-DURATION-13 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "atorvastatin",
+        "dose": "TEST-DOSE-13",
+        "frequency": "TEST-FREQ-13",
+        "duration": "TEST-DURATION-13"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx013 Patient: DEMO-13 | Rx | atorvastatin TEST-DOSE-13 | TEST-FREQ-13 TEST-DURATION-13 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "atorvastatin",
+        "dose": "TEST-DOSE-13",
+        "frequency": "TEST-FREQ-13",
+        "duration": "TEST-DURATION-13"
+      }
+    },
+    {
+      "prescription_id": "rx014",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 187,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx014 Patient: DEMO-14 | Rx | simvastatin TEST-DOSE-14 | TEST-FREQ-14 TEST-DURATION-14 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "simvastatin",
+        "dose": "TEST-DOSE-14",
+        "frequency": "TEST-FREQ-14",
+        "duration": "TEST-DURATION-14"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx014 Patient: DEMO-14 | Rx | simvastatin TEST-DOSE-14 | TEST-FREQ-14 TEST-DURATION-14 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "simvastatin",
+        "dose": "TEST-DOSE-14",
+        "frequency": "TEST-FREQ-14",
+        "duration": "TEST-DURATION-14"
+      }
+    },
+    {
+      "prescription_id": "rx015",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx015 Patient: DEMO-15 | Rx | omeprazole TEST-DOSE-15 | TEST-FREQ-15 TEST-DURATION-15 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "omeprazole",
+        "dose": "TEST-DOSE-15",
+        "frequency": "TEST-FREQ-15",
+        "duration": "TEST-DURATION-15"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx015 Patient: DEMO-15 | Rx | omeprazole TEST-DOSE-15 | TEST-FREQ-15 TEST-DURATION-15 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "omeprazole",
+        "dose": "TEST-DOSE-15",
+        "frequency": "TEST-FREQ-15",
+        "duration": "TEST-DURATION-15"
+      }
+    },
+    {
+      "prescription_id": "rx016",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 188,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx016 Patient: DEMO-16 | Rx | pantoprazole TEST-DOSE-16 | TEST-FREQ-16 TEST-DURATION-16 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "pantoprazole",
+        "dose": "TEST-DOSE-16",
+        "frequency": "TEST-FREQ-16",
+        "duration": "TEST-DURATION-16"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx016 Patient: DEMO-16 | Rx | pantoprazole TEST-DOSE-16 | TEST-FREQ-16 TEST-DURATION-16 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "pantoprazole",
+        "dose": "TEST-DOSE-16",
+        "frequency": "TEST-FREQ-16",
+        "duration": "TEST-DURATION-16"
+      }
+    },
+    {
+      "prescription_id": "rx017",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx017 Patient: DEMO-17 | Rx | cetirizine TEST-DOSE-17 | TEST-FREQ-17 TEST-DURATION-17 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "cetirizine",
+        "dose": "TEST-DOSE-17",
+        "frequency": "TEST-FREQ-17",
+        "duration": "TEST-DURATION-17"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx017 Patient: DEMO-17 | Rx | cetirizine TEST-DOSE-17 | TEST-FREQ-17 TEST-DURATION-17 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "cetirizine",
+        "dose": "TEST-DOSE-17",
+        "frequency": "TEST-FREQ-17",
+        "duration": "TEST-DURATION-17"
+      }
+    },
+    {
+      "prescription_id": "rx018",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx018 Patient: DEMO-18 | Rx | loratadine TEST-DOSE-18 | TEST-FREQ-18 TEST-DURATION-18 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "loratadine",
+        "dose": "TEST-DOSE-18",
+        "frequency": "TEST-FREQ-18",
+        "duration": "TEST-DURATION-18"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx018 Patient: DEMO-18 | Rx | loratadine  TEST-DOSE-18 | TEST-FREQ-18 TEST-DURATION-18 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "loratadine",
+        "dose": "TEST-DOSE-18",
+        "frequency": "TEST-FREQ-18",
+        "duration": "TEST-DURATION-18"
+      }
+    },
+    {
+      "prescription_id": "rx019",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx019 Patient: DEMO-19 | Rx | salbutamol TEST-DOSE-19 | TEST-FREQ-19 TEST-DURATION-19 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "salbutamol",
+        "dose": "TEST-DOSE-19",
+        "frequency": "TEST-FREQ-19",
+        "duration": "TEST-DURATION-19"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx019 Patient: DEMO-19 | Rx | salbutamol TEST-DOSE-19 | TEST-FREQ-19 TEST-DURATION-19 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "salbutamol",
+        "dose": "TEST-DOSE-19",
+        "frequency": "TEST-FREQ-19",
+        "duration": "TEST-DURATION-19"
+      }
+    },
+    {
+      "prescription_id": "rx020",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx020 Patient: DEMO-20 | Rx | budesonide TEST-DOSE-20 | TEST-FREQ-20 TEST-DURATION-20 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "budesonide",
+        "dose": "TEST-DOSE-20",
+        "frequency": "TEST-FREQ-20",
+        "duration": "TEST-DURATION-20"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx020 Patient: DEMO-20 | Rx | budesonide TEST-DOSE-20 | TEST-FREQ-20 TEST-DURATION-20 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "budesonide",
+        "dose": "TEST-DOSE-20",
+        "frequency": "TEST-FREQ-20",
+        "duration": "TEST-DURATION-20"
+      }
+    },
+    {
+      "prescription_id": "rx021",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx021 Patient: DEMO-21 | Rx | prednisone TEST-DOSE-21 | TEST-FREQ-21 TEST-DURATION-21 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "prednisone",
+        "dose": "TEST-DOSE-21",
+        "frequency": "TEST-FREQ-21",
+        "duration": "TEST-DURATION-21"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx021 Patient: DEMO-21 | Rx | prednisone TEST-DOSE-21 | TEST-FREQ-21 TEST-DURATION-21 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "prednisone",
+        "dose": "TEST-DOSE-21",
+        "frequency": "TEST-FREQ-21",
+        "duration": "TEST-DURATION-21"
+      }
+    },
+    {
+      "prescription_id": "rx022",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 190,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx022 Patient: DEMO-22 | Rx | hydrocortisone TEST-DOSE-22 | TEST-FREQ-22 TEST-DURATION-22 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "hydrocortisone",
+        "dose": "TEST-DOSE-22",
+        "frequency": "TEST-FREQ-22",
+        "duration": "TEST-DURATION-22"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx022 Patient: DEMO-22 | Rx | hydrocortisone TEST-DOSE-22 | TEST-FREQ-22 TEST-DURATION-22 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "hydrocortisone",
+        "dose": "TEST-DOSE-22",
+        "frequency": "TEST-FREQ-22",
+        "duration": "TEST-DURATION-22"
+      }
+    },
+    {
+      "prescription_id": "rx023",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 189,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx023 Patient: DEMO-23 | Rx | levothyroxine TEST-DOSE-23 | TEST-FREQ-23 TEST-DURATION-23 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "levothyroxine",
+        "dose": "TEST-DOSE-23",
+        "frequency": "TEST-FREQ-23",
+        "duration": "TEST-DURATION-23"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx023 Patient: DEMO-23 | Rx | levothyroxine TEST-DOSE-23 | TEST-FREQ-23 TEST-DURATION-23 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "levothyroxine",
+        "dose": "TEST-DOSE-23",
+        "frequency": "TEST-FREQ-23",
+        "duration": "TEST-DURATION-23"
+      }
+    },
+    {
+      "prescription_id": "rx024",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx024 Patient: DEMO-24 | Rx | sertraline TEST-DOSE-24 | TEST-FREQ-24 TEST-DURATION-24 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "sertraline",
+        "dose": "TEST-DOSE-24",
+        "frequency": "TEST-FREQ-24",
+        "duration": "TEST-DURATION-24"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx024 Patient: DEMO-24 | Rx | sertraline TEST-DOSE-24 | TEST-FREQ-24 TEST-DURATION-24 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "sertraline",
+        "dose": "TEST-DOSE-24",
+        "frequency": "TEST-FREQ-24",
+        "duration": "TEST-DURATION-24"
+      }
+    },
+    {
+      "prescription_id": "rx025",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx025 Patient: DEMO-25 | Rx | fluoxetine TEST-DOSE-25 | TEST-FREQ-25 TEST-DURATION-25 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "fluoxetine",
+        "dose": "TEST-DOSE-25",
+        "frequency": "TEST-FREQ-25",
+        "duration": "TEST-DURATION-25"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx025 Patient: DEMO-25 | Rx | fluoxetine TEST-DOSE-25 | TEST-FREQ-25 TEST-DURATION-25 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "fluoxetine",
+        "dose": "TEST-DOSE-25",
+        "frequency": "TEST-FREQ-25",
+        "duration": "TEST-DURATION-25"
+      }
+    },
+    {
+      "prescription_id": "rx026",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx026 Patient: DEMO-26 | Rx | gabapentin TEST-DOSE-26 | TEST-FREQ-26 TEST-DURATION-26 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "gabapentin",
+        "dose": "TEST-DOSE-26",
+        "frequency": "TEST-FREQ-26",
+        "duration": "TEST-DURATION-26"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx026 Patient: DEMO-26 | Rx | gabapentin TEST-DOSE-26 | TEST-FREQ-26 TEST-DURATION-26 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "gabapentin",
+        "dose": "TEST-DOSE-26",
+        "frequency": "TEST-FREQ-26",
+        "duration": "TEST-DURATION-26"
+      }
+    },
+    {
+      "prescription_id": "rx027",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx027 Patient: DEMO-27 | Rx | pregabalin TEST-DOSE-27 | TEST-FREQ-27 TEST-DURATION-27 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "pregabalin",
+        "dose": "TEST-DOSE-27",
+        "frequency": "TEST-FREQ-27",
+        "duration": "TEST-DURATION-27"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx027 Patient: DEMO-27 | Rx | pregabalin TEST-DOSE-27 | TEST-FREQ-27 TEST-DURATION-27 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "pregabalin",
+        "dose": "TEST-DOSE-27",
+        "frequency": "TEST-FREQ-27",
+        "duration": "TEST-DURATION-27"
+      }
+    },
+    {
+      "prescription_id": "rx028",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 187,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx028 Patient: DEMO-28 | Rx | clopidogrel TEST-DOSE-28 | TEST-FREQ-28 TEST-DURATION-28 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "clopidogrel",
+        "dose": "TEST-DOSE-28",
+        "frequency": "TEST-FREQ-28",
+        "duration": "TEST-DURATION-28"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx028 Patient: DEMO-28 | Rx | clopidogrel TEST-DOSE-28 | TEST-FREQ-28 TEST-DURATION-28 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "clopidogrel",
+        "dose": "TEST-DOSE-28",
+        "frequency": "TEST-FREQ-28",
+        "duration": "TEST-DURATION-28"
+      }
+    },
+    {
+      "prescription_id": "rx029",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 183,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx029 Patient: DEMO-29 | Rx | aspirin TEST-DOSE-29 | TEST-FREQ-29 TEST-DURATION-29 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "aspirin",
+        "dose": "TEST-DOSE-29",
+        "frequency": "TEST-FREQ-29",
+        "duration": "TEST-DURATION-29"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx029 Patient: DEMO-29 | Rx | aspirin TEST-DOSE-29 | TEST-FREQ-29 TEST-DURATION-29 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "aspirin",
+        "dose": "TEST-DOSE-29",
+        "frequency": "TEST-FREQ-29",
+        "duration": "TEST-DURATION-29"
+      }
+    },
+    {
+      "prescription_id": "rx030",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 184,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx030 Patient: DEMO-30 | Rx | warfarin TEST-DOSE-30 | TEST-FREQ-30 TEST-DURATION-30 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "warfarin",
+        "dose": "TEST-DOSE-30",
+        "frequency": "TEST-FREQ-30",
+        "duration": "TEST-DURATION-30"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx030 Patient: DEMO-30 | Rx | warfarin TEST-DOSE-30 | TEST-FREQ-30 TEST-DURATION-30 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "warfarin",
+        "dose": "TEST-DOSE-30",
+        "frequency": "TEST-FREQ-30",
+        "duration": "TEST-DURATION-30"
+      }
+    },
+    {
+      "prescription_id": "rx031",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 184,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx031 Patient: DEMO-31 | Rx | apixaban TEST-DOSE-31 | TEST-FREQ-31 TEST-DURATION-31 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "apixaban",
+        "dose": "TEST-DOSE-31",
+        "frequency": "TEST-FREQ-31",
+        "duration": "TEST-DURATION-31"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx031 Patient: DEMO-31 | Rx | apixaban TEST-DOSE-31 | TEST-FREQ-31 TEST-DURATION-31 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "apixaban",
+        "dose": "TEST-DOSE-31",
+        "frequency": "TEST-FREQ-31",
+        "duration": "TEST-DURATION-31"
+      }
+    },
+    {
+      "prescription_id": "rx032",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx032 Patient: DEMO-32 | Rx | furosemide TEST-DOSE-32 | TEST-FREQ-32 TEST-DURATION-32 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "furosemide",
+        "dose": "TEST-DOSE-32",
+        "frequency": "TEST-FREQ-32",
+        "duration": "TEST-DURATION-32"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx032 Patient: DEMO-32 | Rx | furosemide TEST-DOSE-32 | TEST-FREQ-32 TEST-DURATION-32 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "furosemide",
+        "dose": "TEST-DOSE-32",
+        "frequency": "TEST-FREQ-32",
+        "duration": "TEST-DURATION-32"
+      }
+    },
+    {
+      "prescription_id": "rx033",
+      "cer": 0.0051,
+      "edit_distance": 1,
+      "reference_characters": 195,
+      "word_accuracy": 0.9677,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx033 Patient: DEMO-33 | Rx | hydrochlorothiazide TEST-DOSE-33 | TEST-FREQ-33 TEST-DURATION-33 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "hydrochlorothiazide",
+        "dose": "TEST-DOSE-33",
+        "frequency": "TEST-FREQ-33",
+        "duration": "TEST-DURATION-33"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx033 Patient: DEMO-33 | Rx | hydrochlorothiazid TEST-DOSE-33 | TEST-FREQ-33 TEST-DURATION-33 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "hydrochlorothiazide",
+        "dose": "TEST-DOSE-33",
+        "frequency": "TEST-FREQ-33",
+        "duration": "TEST-DURATION-33"
+      }
+    },
+    {
+      "prescription_id": "rx034",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx034 Patient: DEMO-34 | Rx | metoprolol TEST-DOSE-34 | TEST-FREQ-34 TEST-DURATION-34 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "metoprolol",
+        "dose": "TEST-DOSE-34",
+        "frequency": "TEST-FREQ-34",
+        "duration": "TEST-DURATION-34"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx034 Patient: DEMO-34 | Rx | metoprolol TEST-DOSE-34 | TEST-FREQ-34 TEST-DURATION-34 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "metoprolol",
+        "dose": "TEST-DOSE-34",
+        "frequency": "TEST-FREQ-34",
+        "duration": "TEST-DURATION-34"
+      }
+    },
+    {
+      "prescription_id": "rx035",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 187,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx035 Patient: DEMO-35 | Rx | propranolol TEST-DOSE-35 | TEST-FREQ-35 TEST-DURATION-35 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "propranolol",
+        "dose": "TEST-DOSE-35",
+        "frequency": "TEST-FREQ-35",
+        "duration": "TEST-DURATION-35"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx035 Patient: DEMO-35 | Rx | propranolol TEST-DOSE-35 | TEST-FREQ-35 TEST-DURATION-35 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "propranolol",
+        "dose": "TEST-DOSE-35",
+        "frequency": "TEST-FREQ-35",
+        "duration": "TEST-DURATION-35"
+      }
+    },
+    {
+      "prescription_id": "rx036",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 187,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx036 Patient: DEMO-36 | Rx | ondansetron TEST-DOSE-36 | TEST-FREQ-36 TEST-DURATION-36 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "ondansetron",
+        "dose": "TEST-DOSE-36",
+        "frequency": "TEST-FREQ-36",
+        "duration": "TEST-DURATION-36"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx036 Patient: DEMO-36 | Rx | ondansetron TEST-DOSE-36 | TEST-FREQ-36 TEST-DURATION-36 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "ondansetron",
+        "dose": "TEST-DOSE-36",
+        "frequency": "TEST-FREQ-36",
+        "duration": "TEST-DURATION-36"
+      }
+    },
+    {
+      "prescription_id": "rx037",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 186,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx037 Patient: DEMO-37 | Rx | famotidine TEST-DOSE-37 | TEST-FREQ-37 TEST-DURATION-37 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "famotidine",
+        "dose": "TEST-DOSE-37",
+        "frequency": "TEST-FREQ-37",
+        "duration": "TEST-DURATION-37"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx037 Patient: DEMO-37 | Rx | famotidine TEST-DOSE-37 | TEST-FREQ-37 TEST-DURATION-37 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "famotidine",
+        "dose": "TEST-DOSE-37",
+        "frequency": "TEST-FREQ-37",
+        "duration": "TEST-DURATION-37"
+      }
+    },
+    {
+      "prescription_id": "rx038",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 187,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx038 Patient: DEMO-38 | Rx | fluconazole TEST-DOSE-38 | TEST-FREQ-38 TEST-DURATION-38 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "fluconazole",
+        "dose": "TEST-DOSE-38",
+        "frequency": "TEST-FREQ-38",
+        "duration": "TEST-DURATION-38"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx038 Patient: DEMO-38 | Rx | fluconazole TEST-DOSE-38 | TEST-FREQ-38 TEST-DURATION-38 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "fluconazole",
+        "dose": "TEST-DOSE-38",
+        "frequency": "TEST-FREQ-38",
+        "duration": "TEST-DURATION-38"
+      }
+    },
+    {
+      "prescription_id": "rx039",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 190,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx039 Patient: DEMO-39 | Rx | nitrofurantoin TEST-DOSE-39 | TEST-FREQ-39 TEST-DURATION-39 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "nitrofurantoin",
+        "dose": "TEST-DOSE-39",
+        "frequency": "TEST-FREQ-39",
+        "duration": "TEST-DURATION-39"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx039 Patient: DEMO-39 | Rx | nitrofurantoin TEST-DOSE-39 | TEST-FREQ-39 TEST-DURATION-39 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "nitrofurantoin",
+        "dose": "TEST-DOSE-39",
+        "frequency": "TEST-FREQ-39",
+        "duration": "TEST-DURATION-39"
+      }
+    },
+    {
+      "prescription_id": "rx040",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 187,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx040 Patient: DEMO-40 | Rx | dicyclomine TEST-DOSE-40 | TEST-FREQ-40 TEST-DURATION-40 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "dicyclomine",
+        "dose": "TEST-DOSE-40",
+        "frequency": "TEST-FREQ-40",
+        "duration": "TEST-DURATION-40"
+      },
+      "predicted": {
+        "text": "SYNTHETIC OCR SAMPLE - NOT FOR MEDICAL USE | ID: rx040 Patient: DEMO-40 | Rx | dicyclomine TEST-DOSE-40 | TEST-FREQ-40 TEST-DURATION-40 | TRAINING DATA ONLY - NO REAL PATIENT OR TREATMENT",
+        "medicines": "dicyclomine",
+        "dose": "TEST-DOSE-40",
+        "frequency": "TEST-FREQ-40",
+        "duration": "TEST-DURATION-40"
+      }
+    },
+    {
+      "prescription_id": "rx041",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 104,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "Paracetamol 500 mg \u2014 1 tablet every 8 hours for 3 days. Cetirizine 10 mg \u2014 1 tablet at night for 3 days.",
+        "medicines": "Paracetamol; Cetirizine",
+        "dose": "500 mg; 10 mg",
+        "frequency": "1 tablet every 8 hours; 1 tablet at night",
+        "duration": "3 days; 3 days"
+      },
+      "predicted": {
+        "text": "Paracetamol 500 mg \u2014 1 tablet every 8 hours for 3 days. Cetirizine 10 mg \u2014 1 tablet at night for 3 days.",
+        "medicines": "Paracetamol; Cetirizine",
+        "dose": "500 mg; 10 mg",
+        "frequency": "1 tablet every 8 hours; 1 tablet at night",
+        "duration": "3 days; 3 days"
+      }
+    },
+    {
+      "prescription_id": "rx042",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 119,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "Pantoprazole 40 mg \u2014 1 tablet before breakfast for 7 days. Ondansetron 4 mg \u2014 1 tablet as needed for nausea for 2 days.",
+        "medicines": "Pantoprazole; Ondansetron",
+        "dose": "40 mg; 4 mg",
+        "frequency": "1 tablet before breakfast; 1 tablet as needed for nausea",
+        "duration": "7 days; 2 days"
+      },
+      "predicted": {
+        "text": "Pantoprazole 40 mg \u2014 1 tablet before breakfast for 7 days. Ondansetron 4 mg \u2014 1 tablet as needed for nausea for 2 days.",
+        "medicines": "Pantoprazole; Ondansetron",
+        "dose": "40 mg; 4 mg",
+        "frequency": "1 tablet before breakfast; 1 tablet as needed for nausea",
+        "duration": "7 days; 2 days"
+      }
+    },
+    {
+      "prescription_id": "rx043",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 107,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "Ambroxol 30 mg \u2014 1 tablet three times daily for 5 days. Levocetirizine 5 mg \u2014 1 tablet at night for 5 days.",
+        "medicines": "Ambroxol; Levocetirizine",
+        "dose": "30 mg; 5 mg",
+        "frequency": "1 tablet three times daily; 1 tablet at night",
+        "duration": "5 days; 5 days"
+      },
+      "predicted": {
+        "text": "Ambroxol 30 mg \u2014 1 tablet three times daily for 5 days. Levocetirizine 5 mg \u2014 1 tablet at night for 5 days.",
+        "medicines": "Ambroxol; Levocetirizine",
+        "dose": "30 mg; 5 mg",
+        "frequency": "1 tablet three times daily; 1 tablet at night",
+        "duration": "5 days; 5 days"
+      }
+    },
+    {
+      "prescription_id": "rx044",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 69,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "Amlodipine 5 mg \u2014 1 tablet daily. Telmisartan 40 mg \u2014 1 tablet daily.",
+        "medicines": "Amlodipine; Telmisartan",
+        "dose": "5 mg; 40 mg",
+        "frequency": "1 tablet daily; 1 tablet daily",
+        "duration": "daily; daily (ongoing)"
+      },
+      "predicted": {
+        "text": "Amlodipine 5 mg \u2014 1 tablet daily. Telmisartan 40 mg \u2014 1 tablet daily.",
+        "medicines": "Amlodipine; Telmisartan",
+        "dose": "5 mg; 40 mg",
+        "frequency": "1 tablet daily; 1 tablet daily",
+        "duration": "daily; daily (ongoing)"
+      }
+    },
+    {
+      "prescription_id": "rx045",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 87,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "Metformin 500 mg \u2014 1 tablet with food twice daily. Sitagliptin 100 mg \u2014 1 tablet daily.",
+        "medicines": "Metformin; Sitagliptin",
+        "dose": "500 mg; 100 mg",
+        "frequency": "1 tablet with food twice daily; 1 tablet daily",
+        "duration": "twice daily; daily (ongoing)"
+      },
+      "predicted": {
+        "text": "Metformin 500 mg \u2014 1 tablet with food twice daily. Sitagliptin 100 mg \u2014 1 tablet daily.",
+        "medicines": "Metformin; Sitagliptin",
+        "dose": "500 mg; 100 mg",
+        "frequency": "1 tablet with food twice daily; 1 tablet daily",
+        "duration": "twice daily; daily (ongoing)"
+      }
+    },
+    {
+      "prescription_id": "rx046",
+      "cer": 0.8816,
+      "edit_distance": 67,
+      "reference_characters": 76,
+      "word_accuracy": 0.0,
+      "exact_4_field_match": false,
+      "field_matches": {
+        "medicines": false,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "Fexofenadine 120 mg \u2014 1 tablet daily. Montelukast 10 mg \u2014 1 tablet at night.",
+        "medicines": "Fexofenadine; Montelukast",
+        "dose": "120 mg; 10 mg",
+        "frequency": "1 tablet daily; 1 tablet at night",
+        "duration": "daily; daily (ongoing)"
+      },
+      "predicted": {
+        "text": "ID: rx046 patient: DEMO-46 | Rx | [unclear] 120mg 1-0-0 | Montelukast 10mg 0-0-1",
+        "medicines": "[unclear]; Montelukast",
+        "dose": "120 mg; 10 mg",
+        "frequency": "1 tablet daily; 1 tablet at night",
+        "duration": "daily; daily (ongoing)"
+      }
+    },
+    {
+      "prescription_id": "rx047",
+      "cer": 0.0,
+      "edit_distance": 0,
+      "reference_characters": 105,
+      "word_accuracy": 1.0,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "Amoxicillin 500 mg \u2014 1 capsule three times daily. Clavulanic acid 125 mg \u2014 combination-product component.",
+        "medicines": "Amoxicillin; Clavulanic acid",
+        "dose": "500 mg; 125 mg",
+        "frequency": "1 capsule three times daily; combination-product component",
+        "duration": "three times daily; as prescribed"
+      },
+      "predicted": {
+        "text": "Amoxicillin 500 mg \u2014 1 capsule three times daily. Clavulanic acid 125 mg \u2014 combination-product component.",
+        "medicines": "Amoxicillin; Clavulanic acid",
+        "dose": "500 mg; 125 mg",
+        "frequency": "1 capsule three times daily; combination-product component",
+        "duration": "three times daily; as prescribed"
+      }
+    },
+    {
+      "prescription_id": "rx048",
+      "cer": 0.022,
+      "edit_distance": 2,
+      "reference_characters": 91,
+      "word_accuracy": 0.9444,
+      "exact_4_field_match": true,
+      "field_matches": {
+        "medicines": true,
+        "dose": true,
+        "frequency": true,
+        "duration": true
+      },
+      "expected": {
+        "text": "Ibuprofen 200 mg \u2014 1 tablet as directed with food. Diclofenac 50 mg \u2014 1 tablet as directed.",
+        "medicines": "Ibuprofen; Diclofenac",
+        "dose": "200 mg; 50 mg",
+        "frequency": "1 tablet as directed with food; 1 tablet as directed",
+        "duration": "as directed; as directed"
+      },
+      "predicted": {
+        "text": "Improfen 200 mg \u2014 1 tablet as directed with food. Diclofenac 50 mg \u2014 1 tablet as directed.",
+        "medicines": "Ibuprofen; Diclofenac",
+        "dose": "200 mg; 50 mg",
+        "frequency": "1 tablet as directed with food; 1 tablet as directed",
+        "duration": "as directed; as directed"
+      }
+    },
+    {
+      "prescription_id": "rx049",
+      "cer": 0.3178,
+      "edit_distance": 41,
+      "reference_characters": 129,
+      "word_accuracy": 0.68,
+      "exact_4_field_match": false,
+      "field_matches": {
+        "medicines": false,
+        "dose": false,
+        "frequency": false,
+        "duration": false
+      },
+      "expected": {
+        "text": "Cyanocobalamin (Vitamin B12) 500 mcg \u2014 1 tablet daily. Folic acid 5 mg \u2014 1 tablet daily. Ferrous sulfate 325 mg \u2014 1 tablet daily.",
+        "medicines": "Cyanocobalamin (Vitamin B12); Folic acid; Ferrous sulfate",
+        "dose": "500 mcg; 5 mg; 325 mg",
+        "frequency": "1 tablet daily; 1 tablet daily; 1 tablet daily",
+        "duration": "daily; daily; daily"
+      },
+      "predicted": {
+        "text": "Cyanocobalamin (Vitamin B12) 500 mcg \u2014 1 tablet daily. Folic acid 5 mg \u2014 1 tablet daily.",
+        "medicines": "Cyanocobalamin (Vitamin B12); Folic acid",
+        "dose": "500 mcg; 5 mg",
+        "frequency": "1 tablet daily; 1 tablet daily",
+        "duration": "daily; daily"
+      }
+    },
+    {
+      "prescription_id": "rx050",
+      "cer": 0.3738,
+      "edit_distance": 40,
+      "reference_characters": 107,
+      "word_accuracy": 0.6364,
+      "exact_4_field_match": false,
+      "field_matches": {
+        "medicines": false,
+        "dose": false,
+        "frequency": false,
+        "duration": false
+      },
+      "expected": {
+        "text": "Aspirin 75 mg \u2014 1 tablet daily. Clopidogrel 75 mg \u2014 1 tablet daily. Atorvastatin 20 mg \u2014 1 tablet at night.",
+        "medicines": "Aspirin; Clopidogrel; Atorvastatin",
+        "dose": "75 mg; 75 mg; 20 mg",
+        "frequency": "1 tablet daily; 1 tablet daily; 1 tablet at night",
+        "duration": "daily; daily; daily (ongoing)"
+      },
+      "predicted": {
+        "text": "Aspirin 75 mg \u2014 1 tablet daily. Clopidogrel 75 mg \u2014 1 tablet daily.",
+        "medicines": "Aspirin; Clopidogrel",
+        "dose": "75 mg; 75 mg",
+        "frequency": "1 tablet daily; 1 tablet daily",
+        "duration": "daily; daily"
+      }
+    }
+  ]
+}
