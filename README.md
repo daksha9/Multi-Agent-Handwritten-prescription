@@ -90,12 +90,11 @@ The system combines computer vision, speech transformers, clinical knowledge gra
 ---
 
 ### 1.7 Methodology
-The methodology follows a phased, multi-agent lifecycle:
-1. **Signal & Visual Preprocessing (Stage 1):** Ingest raw image buffers; convert to CIELAB space; execute Contrast Limited Adaptive Histogram Equalization (CLAHE) on the L-channel; calculate minimum bounding box rotation angles; deskew via 2D affine transformation; apply Otsu binarization.
-2. **Vision-Language Understanding (Stage 2):** Transmit enhanced imagery to Gemini Vision with strict JSON schema constraints; match extracted tokens against the chemical drug dictionary using Levenshtein distance; stratify confidence into certainty tiers.
-3. **Speech Signal Processing & Clinical NER (Stage 3):** Sniff audio magic bytes (`RIFF`, `EBML/WebM`, `ID3`); stream audio to Groq Whisper LPU; decode multilingual speech; extract structured clinical entities (allergies, chronic conditions, active medications) via finite-state pattern matching.
-4. **Clinical Safety & Pharmacovigilance Reasoning (Stage 4):** Traverse bipartite DDI graphs and allergy taxonomies; evaluate post-medication symptoms; compute causality likelihood, biological mechanisms, physician action plans, and emergency red flags.
-5. **Business Intelligence Synthesis & Telemetry:** Aggregate execution latencies; format Kimball relational tables; package exportable CSVs and JSON health records.
+The methodology follows a phased, 3-stage multi-agent lifecycle:
+1. **Visual Signal Preprocessing (Stage 1 - Preprocessor Agent):** Ingest raw image buffers; execute Contrast Limited Adaptive Histogram Equalization (CLAHE); apply Otsu thresholding; calculate minimum bounding box rotation angles (`cv2.minAreaRect`) and deskew via 2D affine transformation.
+2. **Vision-Language Understanding & Normalization (Stage 2 - Vision OCR Agent):** Transmit enhanced imagery to Gemini Vision with structured schema constraints; match extracted tokens against chemical drug taxonomies using Levenshtein distance; stratify confidence into certainty badges.
+3. **Clinical Safety & Pharmacovigilance Reasoning (Stage 3 - Clinical Safety & ADR Agent):** Ingest extracted regimens along with patient post-medication feedback (text / Groq Whisper voice); traverse bipartite DDI graphs and allergy cross-reactivity matrices; compute Naranjo-aligned ADR causality likelihood, biological mechanisms, physician action plans, and emergency alerts.
+4. **Business Intelligence Synthesis & Telemetry:** Aggregate execution latencies; format Kimball Star-Schema relational tables (`Dim_Patient`, `Fact_Prescriptions`, `Fact_MedicationImpact`, `Fact_Biomarkers`); package exportable CSVs for enterprise Microsoft Power BI dashboards.
 
 ---
 
@@ -141,11 +140,11 @@ Handwritten/med_agent/
 │   ├── app.py                        # Streamlit web application & interactive clinical UI
 │   ├── evaluate_metrics.py           # Command-line benchmark evaluator for Accuracy, F1, Latencies
 │   └── modules/
-│       ├── preprocessor.py           # Stage 1: CLAHE enhancement & affine deskewing
-│       ├── prescription_vision.py    # Stage 2: Gemini Vision handwritten OCR & entity extraction
-│       ├── voice_agent.py            # Stage 3: Groq Whisper & Gemini audio transcription + NER
-│       ├── verification_agent.py     # Stage 4: DDI, allergy matrix & Naranjo ADR causality
-│       ├── orchestrator.py           # Master agent coordinator, telemetry & Power BI exporter
+│       ├── preprocessor.py           # Stage 1: CLAHE enhancement, Otsu binarization & affine deskewing
+│       ├── prescription_vision.py    # Stage 2: Gemini Vision handwritten OCR & chemical normalization
+│       ├── verification_agent.py     # Stage 3: Clinical safety, DDI graph & Naranjo ADR causality
+│       ├── voice_agent.py            # Speech engine: Groq Whisper LPU & voice transcription
+│       ├── orchestrator.py           # Master 3-stage agent coordinator & Power BI exporter
 │       ├── drug_dictionary.py        # Generic/brand chemical compound mappings
 │       ├── patient_database.py       # Patient profile storage & longitudinal lab records
 │       ├── impact_analyzer.py        # Biomarker progression & therapeutic efficiency scoring
@@ -185,11 +184,8 @@ Handwritten/med_agent/
 │  [STAGE 2: VISION OCR AGENT]                                                             │
 │   Enhanced Image ──► Gemini Vision ──► Chemical Normalization ──► Certainty Badging      │
 │                                                                                          │
-│  [STAGE 3: VOICE ASSISTANT AGENT]                                                        │
-│   Audio Bytes ──► Magic-Byte Sniff ──► Groq Whisper LPU ──► Speech Text ──► Clinical NER│
-│                                                                                          │
-│  [STAGE 4: CLINICAL SAFETY & ADR AGENT]                                                  │
-│   Regimen + Spoken History + Post-Med Feedback ──► DDI Graph + Naranjo ADR Causality    │
+│  [STAGE 3: CLINICAL SAFETY & ADR AGENT]                                                  │
+│   Regimen + Post-Med Feedback (Text/Voice) ──► DDI Graph + Naranjo ADR Causality         │
 │                                                                                          │
 └─────────────────────────────────────────────┬────────────────────────────────────────────┘
                                               │
@@ -437,11 +433,11 @@ END
 ## 3. Implementation & Testing
 
 ### 3.1 Modules Description
-1. **`src/modules/preprocessor.py`:** Preprocessing agent utilizing OpenCV for CLAHE contrast stretching, Otsu binarization, and minimum bounding box affine deskewing.
-2. **`src/modules/prescription_vision.py`:** Stage 2 agent using Gemini Vision Flash to extract structured medicines, dosages, frequencies, and confidence ratings.
-3. **`src/modules/voice_agent.py`:** Stage 3 agent handling audio magic-byte container resolution, Groq Whisper speech transcription, and finite-state clinical Named Entity Recognition.
-4. **`src/modules/verification_agent.py`:** Stage 4 agent executing deterministic Drug-Drug Interaction (DDI) graph searches, allergy cross-reactivity audits, and Naranjo-aligned post-medication ADR causality.
-5. **`src/modules/orchestrator.py`:** Master multi-agent coordinator that manages pipeline telemetry, aggregates stage latencies, and writes star-schema CSV tables for Microsoft Power BI.
+1. **`src/modules/preprocessor.py`:** Stage 1 agent utilizing OpenCV for CLAHE contrast stretching, Otsu binarization, and minimum bounding box affine deskewing.
+2. **`src/modules/prescription_vision.py`:** Stage 2 agent using Gemini Vision Flash to extract structured medicines, dosages, frequencies, and confidence ratings with chemical compound normalization.
+3. **`src/modules/verification_agent.py`:** Stage 3 agent executing deterministic Drug-Drug Interaction (DDI) graph searches, allergy cross-reactivity audits, and Naranjo-aligned post-medication ADR causality.
+4. **`src/modules/voice_agent.py`:** Audio speech engine handling audio magic-byte container resolution and Groq Whisper speech transcription.
+5. **`src/modules/orchestrator.py`:** Master 3-stage agent coordinator that manages pipeline telemetry, aggregates stage latencies, and writes star-schema CSV tables for Microsoft Power BI.
 6. **`src/modules/impact_analyzer.py`:** Longitudinal analytical engine that tracks chronological biomarker deltas ($\Delta$ and $\%\Delta$), computes weighted therapeutic efficiency scores, and forecasts trajectories.
 7. **`src/modules/parser.py`:** Diagnostic document parser reading laboratory report PDFs via `pdfplumber` and extracting tabular test parameters using compiled regex patterns.
 8. **`src/modules/patient_database.py`:** In-memory and persistent JSON store maintaining deduplicated patient clinical profiles, active medications, and sequential lab visits.

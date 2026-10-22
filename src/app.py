@@ -614,33 +614,43 @@ with tab1:
                     st.image(_enh_path, caption="✨ Enhanced Prescription (Stage 1 Output: CLAHE + De-skew)", use_container_width=True)
 
         with col_act:
-            st.markdown("### 🤖 4-Stage Agent Pipeline")
+            st.markdown("### 🤖 3-Stage Agent Pipeline")
+            st.markdown(
+                """
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:0.8rem; color:#334155; margin-bottom:12px; line-height:1.5;">
+                    <div><b>1️⃣ Stage 1: Preprocessor Agent</b><br><span style="color:#64748b;">Raw Photo ──► CLAHE Contrast ──► Otsu Thresholding ──► MinAreaRect Affine Deskew</span></div>
+                    <div style="margin-top:6px;"><b>2️⃣ Stage 2: Vision OCR Agent</b><br><span style="color:#64748b;">Enhanced Image ──► Gemini Vision ──► Chemical Normalization ──► Certainty Badging</span></div>
+                    <div style="margin-top:6px;"><b>3️⃣ Stage 3: Clinical Safety & ADR Agent</b><br><span style="color:#64748b;">Regimen + Post-Med Feedback (Text/Voice) ──► DDI Graph + Naranjo ADR Causality</span></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
             pipeline_status = []
             if vision_extractor.is_available:
-                pipeline_status.append("🟢 Stage 1 & 2 (Vision): Gemini Online")
+                pipeline_status.append("🟢 Stage 1 & 2: Gemini Vision Online")
             else:
-                pipeline_status.append("🟡 Stage 1 & 2 (Vision): Using ground-truth calibration")
-            pipeline_status.append("🟢 Stage 3 (Safety): Clinical Reasoning Engine Ready")
+                pipeline_status.append("🟡 Stage 1 & 2: Vision Calibrated (Ground-Truth Engine)")
+            pipeline_status.append("🟢 Stage 3: Clinical Safety & ADR Graph Ready")
             for ps in pipeline_status:
                 st.markdown(f"<div style='font-size:0.85rem; margin:2px 0;'>{ps}</div>", unsafe_allow_html=True)
 
 
             run_extract = st.button(
-                "🚀 Run 4-Stage Agent Pipeline", type="primary", use_container_width=True
+                "🚀 Run 3-Stage Agent Pipeline", type="primary", use_container_width=True
             )
             if run_extract:
-                progress_bar = st.progress(0, text="Initializing 4-Stage Agent Pipeline...")
+                progress_bar = st.progress(0, text="Initializing 3-Stage Agent Pipeline...")
                 time.sleep(0.15)
 
-                progress_bar.progress(15, text="🔍 Stage 1/3: CLAHE contrast enhancement, binarization & de-skew...")
+                progress_bar.progress(20, text="🔍 Stage 1/3: Preprocessor Agent (CLAHE Contrast, Otsu Thresholding & Deskew)...")
                 time.sleep(0.2)
-                progress_bar.progress(35, text="🧠 Stage 2/3: Gemini Vision deciphering handwritten prescription...")
+                progress_bar.progress(55, text="🧠 Stage 2/3: Vision OCR Agent (Gemini Vision, Chemical Normalization & Certainty Badging)...")
 
-                pipeline_result = orchestrator.run_4stage_pipeline(rx_image)
+                pipeline_result = orchestrator.run_3stage_pipeline(rx_image)
 
-                progress_bar.progress(90, text="🛡️ Stage 3/3: Clinical safety reasoning (allergy/DDI/side-effect)...")
+                progress_bar.progress(85, text="🛡️ Stage 3/3: Clinical Safety & ADR Agent (DDI Graph + Naranjo ADR Causality)...")
                 time.sleep(0.15)
-                progress_bar.progress(100, text="✅ Pipeline complete — generating Doctor Dashboard...")
+                progress_bar.progress(100, text="✅ 3-Stage Pipeline complete — Doctor Dashboard generated!")
                 time.sleep(0.2)
                 progress_bar.empty()
 
@@ -666,9 +676,9 @@ with tab1:
                         }
                         for m in stage2.get("prescribed_medications", [])
                     ],
-                    "model_used": "Gemini 4-Stage Agent Pipeline",
+                    "model_used": "Gemini 3-Stage Agent Pipeline",
                 }
-                st.toast("🎉 4-Stage Pipeline completed! Doctor Dashboard generated.")
+                st.toast("🎉 3-Stage Pipeline completed! Doctor Dashboard generated.")
 
     # Display Extracted Data
     rx_res = st.session_state.get("rx_extraction_result")
@@ -754,7 +764,7 @@ with tab1:
                 )
 
         # ════════════════════════════════════════════════════════════════
-        # STAGE 3 + STAGE 4: Patient Voice History & Doctor Safety Dashboard
+        # STAGE 3: Clinical Safety & ADR Agent (Patient Voice/Feedback + Doctor Safety)
         # ════════════════════════════════════════════════════════════════
         _pipeline = st.session_state.get("pipeline_result")
         if _pipeline:
@@ -797,7 +807,7 @@ with tab1:
                 else:
                     st.markdown("- None reported")
 
-            # ── Stage 4: Doctor Safety Dashboard ──
+            # ── Stage 3: Clinical Safety & ADR Agent ──
             st.divider()
             _alert_level = _stage4.get("overall_safety_alert_level", "GREEN")
             _alert_colors = {"RED": "#dc2626", "AMBER": "#f59e0b", "GREEN": "#16a34a"}
@@ -811,7 +821,7 @@ with tab1:
                 f'<div style="background:{_ab}; border:2px solid {_ac}; border-radius:14px; padding:20px 24px; margin:10px 0; text-align:center;">'
                 f'<div style="font-size:2.4rem;">{_ai}</div>'
                 f'<div style="font-size:1.5rem; font-weight:800; color:{_ac}; margin-top:6px;">OVERALL SAFETY ALERT: {_alert_level}</div>'
-                f'<div style="font-size:0.9rem; color:#475569; margin-top:4px;">Stage 4 Clinical Reasoning & Doctor Safety Agent</div>'
+                f'<div style="font-size:0.9rem; color:#475569; margin-top:4px;">Stage 3 Clinical Safety & ADR Agent (DDI Graph + Naranjo ADR Causality)</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
@@ -1232,7 +1242,7 @@ with tab3:
                 <h3 style="color: #334155; margin: 0 0 12px 0;">Doctor Clinical Analysis Dashboard Waiting for Inputs</h3>
                 <p style="color: #64748b; font-size: 1rem; margin: 0 auto; max-width: 620px; line-height: 1.6;">
                     To generate the clinical dashboard:
-                    <br>1️⃣ Go to <b>📝 Handwritten Prescription & Voice Assistant</b> and run the 4-Stage extraction.
+                    <br>1️⃣ Go to <b>📝 Handwritten Prescription & Voice Assistant</b> and run the 3-Stage extraction.
                     <br>2️⃣ Go to <b>💬 Patient Post-Medication Feedback</b> to record or type patient post-visit symptoms.
                     <br>3️⃣ Return here to review the synthesized clinical assessment, ADR causality, and doctor action plan.
                 </p>
@@ -1264,7 +1274,7 @@ with tab3:
                 triage_bg = "#fffbeb"
                 triage_icon = "🟠"
 
-        # Check stage 4 pipeline alert level
+        # Check Stage 3 safety pipeline alert level
         if pipeline_res_dash and pipeline_res_dash.get("stage4_doctor_dashboard"):
             s4_level = pipeline_res_dash["stage4_doctor_dashboard"].get("overall_safety_alert_level", "GREEN")
             if s4_level == "RED":
@@ -1515,65 +1525,175 @@ with tab3:
 
         st.divider()
 
-        # SECTION 6: Microsoft Power BI Healthcare Analytics Export
-        st.markdown("### 📊 6. Microsoft Power BI Healthcare Analytics Export")
+        # SECTION 6: Microsoft Power BI Healthcare Analytics Export & Live Data Explorer
+        st.markdown("### 📊 6. Microsoft Power BI Healthcare Analytics & Live Data Explorer")
         st.markdown(
-            "Export enterprise relational data models directly into Microsoft Power BI-ready CSV files. "
-            "The tables adhere to the **Kimball Star-Schema** architecture (`Dim_Patient`, `Dim_Medications`, `Fact_LabResults`, `Fact_Prescriptions`, `Fact_ADR_Causality`), "
-            "allowing instant drag-and-drop clinical business intelligence, parameter trend visualization, and hospital risk tracking."
+            "MedAgent prepares enterprise relational data models structured for **Microsoft Power BI** (`Dim_Patient`, `Dim_Medications`, `Fact_LabResults`, `Fact_Prescriptions`, `Fact_ADR_Causality`). "
+            "You can explore the live Power BI-ready tables directly on screen below, inspect the schema, and download individual or batch datasets."
         )
 
-        col_pbi1, col_pbi2 = st.columns([1, 1])
-        with col_pbi1:
-            st.markdown("#### 🌟 Star-Schema Relational Architecture")
+        # Prepare Power BI datasets automatically so judges see live tables immediately
+        all_rx_list = current_patient.get("prescriptions", [])
+        if rx_res_dash and rx_res_dash.get("status") == "success":
+            all_rx_list = [rx_res_dash] + all_rx_list
+
+        all_labs = current_patient.get("lab_reports", [])
+        comp_records = impact_analyzer.compare_medication_impact(all_labs)
+
+        # Ensure latest Power BI files are generated in outputs/exports/
+        paths = orchestrator.export_longitudinal_powerbi_datasets(
+            patient_info=current_patient,
+            comparison_records=comp_records,
+            prescriptions=all_rx_list,
+            lab_reports=all_labs,
+        )
+        st.session_state["pbi_export_paths"] = paths
+
+        # Top KPI Metrics Ribbon for Judges
+        pbi_kpi1, pbi_kpi2, pbi_kpi3, pbi_kpi4 = st.columns(4)
+        with pbi_kpi1:
+            st.metric("Total Prescriptions Ingested", len(all_rx_list), help="Count of digitized + historical prescriptions")
+        with pbi_kpi2:
+            st.metric("Biomarker Lab Points", len(all_labs), help="Longitudinal lab tests tracked")
+        with pbi_kpi3:
+            st.metric("Medication Impact Deltas", len(comp_records), help="Before vs After biomarker parameter transitions")
+        with pbi_kpi4:
+            st.metric("Data Model Schema", "Kimball Star-Schema", help="Optimized for Power BI / Fabric / Synapse")
+
+        st.markdown("#### 🖥️ Interactive Power BI Data Explorer (Live Relational Tables)")
+        st.caption("Inspect each relational table before importing into Power BI Desktop or downloading:")
+
+        pbi_tab1, pbi_tab2, pbi_tab3, pbi_tab4 = st.tabs([
+            "📋 1. Dim_Patient (Overview)",
+            "💊 2. Fact_Prescriptions (Telemetry)",
+            "📈 3. Fact_MedicationImpact (Before/After)",
+            "🧪 4. Fact_Biomarkers (Lab History)",
+        ])
+
+        with pbi_tab1:
+            st.markdown("##### 👤 Dimension: Patient Overview (`Dim_Patient.csv`)")
+            df_pt = pd.DataFrame([{
+                "Patient_ID": current_patient.get("patient_id", "P001"),
+                "Name": current_patient.get("name", "Unknown"),
+                "Age": current_patient.get("age", "N/A"),
+                "Gender": current_patient.get("gender", "N/A"),
+                "Conditions": "; ".join(current_patient.get("known_conditions", [])),
+                "Allergies": "; ".join(current_patient.get("known_allergies", [])),
+                "Adverse_Reactions": "; ".join(current_patient.get("adverse_reactions", [])),
+                "Current_Medications": "; ".join(current_patient.get("current_medications", [])),
+            }])
+            st.dataframe(df_pt, use_container_width=True, hide_index=True)
+            if Path(paths.get("patient_overview", "")).exists():
+                st.download_button(
+                    "⬇️ Download Dim_Patient.csv",
+                    data=Path(paths["patient_overview"]).read_bytes(),
+                    file_name="Dim_Patient.csv",
+                    mime="text/csv",
+                    key="dl_pbi_pt_inline",
+                    use_container_width=False,
+                )
+
+        with pbi_tab2:
+            st.markdown("##### 💊 Fact: Prescription Telemetry (`Fact_Prescriptions.csv`)")
+            rx_rows_display = []
+            for rx in all_rx_list:
+                rx_d = rx.get("date", "")
+                dr = rx.get("doctor_name", "")
+                clinic = rx.get("clinic_name", "")
+                cond = rx.get("diagnosed_condition", "")
+                for med in rx.get("medicines", []):
+                    rx_rows_display.append({
+                        "Prescription_Date": rx_d,
+                        "Doctor": dr,
+                        "Clinic": clinic,
+                        "Diagnosed_Condition": cond,
+                        "Medicine_Name": med.get("medicine_name", ""),
+                        "Form": med.get("form", "Tablet"),
+                        "Dosage": med.get("dosage", ""),
+                        "Frequency": med.get("frequency", ""),
+                        "Duration": med.get("duration", ""),
+                        "Certainty": med.get("certainty", "High"),
+                    })
+            df_rx_disp = pd.DataFrame(rx_rows_display) if rx_rows_display else pd.DataFrame(columns=["Prescription_Date", "Medicine_Name", "Dosage", "Frequency"])
+            st.dataframe(df_rx_disp, use_container_width=True, hide_index=True)
+            if Path(paths.get("prescriptions", "")).exists():
+                st.download_button(
+                    "⬇️ Download Fact_Prescriptions.csv",
+                    data=Path(paths["prescriptions"]).read_bytes(),
+                    file_name="Fact_Prescriptions.csv",
+                    mime="text/csv",
+                    key="dl_pbi_rx_inline",
+                    use_container_width=False,
+                )
+
+        with pbi_tab3:
+            st.markdown("##### 📈 Fact: Medication Impact Longitudinal Deltas (`Fact_MedicationImpact.csv`)")
+            df_comp_disp = pd.DataFrame(comp_records) if comp_records else pd.DataFrame(columns=["Parameter", "Date of Test", "Previous Value", "Current Value", "Difference / Change", "Percentage Change", "Status Indicator"])
+            clean_comp_cols = [c for c in df_comp_disp.columns if not c.startswith("raw_")]
+            st.dataframe(df_comp_disp[clean_comp_cols] if not df_comp_disp.empty else df_comp_disp, use_container_width=True, hide_index=True)
+            if Path(paths.get("medication_impact", "")).exists():
+                st.download_button(
+                    "⬇️ Download Fact_MedicationImpact.csv",
+                    data=Path(paths["medication_impact"]).read_bytes(),
+                    file_name="Fact_MedicationImpact.csv",
+                    mime="text/csv",
+                    key="dl_pbi_comp_inline",
+                    use_container_width=False,
+                )
+
+        with pbi_tab4:
+            st.markdown("##### 🧪 Fact: Biomarker Lab History (`Fact_Biomarkers.csv`)")
+            df_labs_disp = pd.DataFrame(all_labs) if all_labs else pd.DataFrame(columns=["date", "parameter", "value", "unit", "reference_range", "status"])
+            st.dataframe(df_labs_disp, use_container_width=True, hide_index=True)
+            if Path(paths.get("biomarkers", "")).exists():
+                st.download_button(
+                    "⬇️ Download Fact_Biomarkers.csv",
+                    data=Path(paths["biomarkers"]).read_bytes(),
+                    file_name="Fact_Biomarkers.csv",
+                    mime="text/csv",
+                    key="dl_pbi_labs_inline",
+                    use_container_width=False,
+                )
+
+        st.markdown("---")
+        # Collapsible Guide: How to demonstrate in Power BI
+        with st.expander("💡 Judge Demonstration Guide: How Power BI Connects to MedAgent", expanded=True):
             st.markdown(
                 """
-                - **`Dim_Patient.csv`**: Patient demographics, documented allergies, chronic conditions, and safety measures.
-                - **`prescriptions_telemetry.csv`**: Digitized medications, dosage, frequency, duration, certainty score, and clinic pad info.
-                - **`medication_impact_comparison.csv`**: Before/after biomarker transitions, absolute delta, percentage changes, and efficiency status.
-                - **`biomarkers_telemetry.csv`**: Longitudinal lab values, test dates, standard units, and clinical reference intervals.
-                - **`clinical_kpi_telemetry.csv`**: Operational triage alerts, ADR counts, pipeline latencies, and patient safety metrics.
+                ### 🎙️ What to tell the Judges:
+                > *"MedAgent doesn't just stop at digitizing handwritten prescriptions — it continuously feeds an enterprise-ready **Star-Schema relational data warehouse** for clinical business intelligence in Microsoft Power BI. Hospital chief medical officers can track prescription volumes, drug-drug interaction alerts, and longitudinal patient health outcomes across multiple visits in real-time."*
+
+                ### 🖥️ Why does a `.csv` open in Excel by default?
+                - A `.csv` (Comma-Separated Values) file is the **standard universal ingestion format** for Power BI, Tableau, and SQL data warehouses.
+                - Because Microsoft Windows associates `.csv` files with Microsoft Excel by default, double-clicking any CSV file opens Excel.
+                - **To show Power BI directly to the judges:**
+                  1. Launch **Power BI Desktop** on your computer.
+                  2. Click **Get Data** &rarr; **Text/CSV** (or **Folder**).
+                  3. Select the folder: `outputs/exports`.
+                  4. Power BI will auto-detect the relationships (`Dim_Patient` &harr; `Fact_Prescriptions` &harr; `Fact_MedicationImpact`)!
                 """
             )
 
-        with col_pbi2:
-            st.markdown("#### 🚀 Generate Datasets for Power BI")
-            st.caption("Writes structured CSV tables into `outputs/exports/` for direct Power BI desktop ingestion.")
-            if st.button("📊 Export All Tables for Power BI", type="secondary", use_container_width=True):
-                all_rx_list = current_patient.get("prescriptions", [])
-                if rx_res_dash and rx_res_dash.get("status") == "success":
-                    all_rx_list = [rx_res_dash] + all_rx_list
-
-                all_labs = current_patient.get("lab_reports", [])
-                comp_records = impact_analyzer.compare_medication_impact(all_labs)
-
-                paths = orchestrator.export_longitudinal_powerbi_datasets(
+        col_pbi_dl1, col_pbi_dl2 = st.columns([1, 1])
+        with col_pbi_dl1:
+            st.markdown("#### 🌟 Relational Schema Architecture")
+            st.markdown(
+                """
+                - **`Dim_Patient.csv`**: Patient demographics, allergies, chronic conditions, and past ADRs.
+                - **`Fact_Prescriptions.csv`**: Full stroke OCR telemetry, certainty scores, doses, and directions.
+                - **`Fact_MedicationImpact.csv`**: Before vs after biomarker delta, percentage shifts, and efficacy.
+                - **`Fact_Biomarkers.csv`**: Longitudinal lab tests (HbA1c, Fasting Glucose, eGFR, BP).
+                """
+            )
+        with col_pbi_dl2:
+            st.markdown("#### 🚀 Batch Export All Datasets")
+            st.caption("Export all 4 tables at once to `outputs/exports/` for direct Power BI Desktop loading.")
+            if st.button("🔄 Re-sync All Datasets Now", type="secondary", use_container_width=True):
+                paths_fresh = orchestrator.export_longitudinal_powerbi_datasets(
                     patient_info=current_patient,
                     comparison_records=comp_records,
                     prescriptions=all_rx_list,
                     lab_reports=all_labs,
                 )
-                st.session_state["pbi_export_paths"] = paths
-                st.success("✅ Power BI datasets successfully generated in `outputs/exports/`!")
-
-            pbi_paths = st.session_state.get("pbi_export_paths")
-            if pbi_paths:
-                st.markdown("**Generated Relational CSV Tables:**")
-                for tbl_name, file_p in pbi_paths.items():
-                    if Path(file_p).exists():
-                        csv_data = Path(file_p).read_bytes()
-                        st.download_button(
-                            f"⬇️ Download {Path(file_p).name}",
-                            data=csv_data,
-                            file_name=Path(file_p).name,
-                            mime="text/csv",
-                            key=f"dl_pbi_{tbl_name}",
-                            use_container_width=True,
-                        )
-
-            st.markdown(
-                '<div style="font-size: 0.85rem; color: #64748b; margin-top: 10px; background: #f8fafc; padding: 8px 12px; border-radius: 6px;">'
-                '💡 <b>Power BI Ingestion:</b> Open Power BI Desktop &rarr; Click <b>Get Data &rarr; Folder</b> (or CSV) &rarr; Select <code>med_agent/outputs/exports</code> &rarr; Load.'
-                '</div>',
-                unsafe_allow_html=True,
-            )
+                st.session_state["pbi_export_paths"] = paths_fresh
+                st.success(f"✅ All 4 Power BI datasets refreshed in `outputs/exports/` at {datetime.now().strftime('%H:%M:%S')}!")

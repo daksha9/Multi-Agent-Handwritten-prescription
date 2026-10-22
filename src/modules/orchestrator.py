@@ -204,6 +204,9 @@ class ClinicalAgentOrchestrator:
             "execution_telemetry": telemetry,
         }
 
+    # Alias for 3-stage agent architecture
+    run_3stage_pipeline = run_4stage_pipeline
+
     def run_post_medication_analysis(
         self,
         feedback_text: str | None = None,
